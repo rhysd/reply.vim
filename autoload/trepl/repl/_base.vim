@@ -17,8 +17,12 @@ function! s:base.get_command() abort
     return [self.executable()]
 endfunction
 
-function! s:base.start(source) abort
-    let self.context = {'source': a:source}
+" context {
+"   source?: string;
+"   bufname?: string;
+" }
+function! s:base.start(context) abort
+    let self.context = a:context
     let cmd = self.get_command()
     if type(cmd) != v:t_list
         let cmd = [cmd]
@@ -34,9 +38,9 @@ endfunction
 
 " TODO: stop
 
-function! trepl#repl#_base#new(name) abort
+function! trepl#repl#_base#new(config) abort
     let r = deepcopy(s:base)
-    let r.name = a:name
-    call trepl#log('Created new REPL instance for', a:name)
+    let r.name = a:config.name
+    call trepl#log('Created new REPL instance for', a:config.name)
     return r
 endfunction
