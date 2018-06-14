@@ -52,9 +52,10 @@ function! s:stop_repl(repl) abort
 endfunction
 
 function! trepl#lifecycle#stop_latest() abort
-    if !empty(s:repls)
-        call s:stop_repl(s:repls[-1])
+    if empty(s:repls)
+        echo 'No REPL is running'
     endif
+    call s:stop_repl(s:repls[-1])
 endfunction
 
 function! trepl#lifecycle#stop_all() abort
