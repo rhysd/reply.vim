@@ -33,7 +33,7 @@ function! trepl#command#send(str) abort
         call trepl#error('No REPL related to buffer #%d was found', bufnr)
         return
     endif
-    try:
+    try
         call r.send_string(str)
     catch /^trepl\.vim: /
     endtry

@@ -64,22 +64,21 @@ function! s:base.send_string(str) abort
         let str .= "\n"
     endif
 
+    " Note: Need to enter Terminal-Job mode for updating the terminal window
+
     let winnr = bufwinnr(self.term_bufnr)
     if winnr == -1
-        call trepl#error("REPL '%s' is open in window (TODO: Open window if closed)", self.name)
+        call trepl#error("REPL '%s' (buf #%d) is open in window (TODO: Open window if closed)", self.name, self.term_bufnr)
         return
     endif
     let prev_winnr = winnr()
     execute winnr . 'wincmd w'
-    " TODO: This does not work if the window is not in terminal normal mode
-    normal! i
-
-    let job = term_getjob(self.term_bufnr)
-    if job is v:null
-        throw trepl#error("Job is not found for terminal at buffer #%d", self.term_bufnr)
+    if mode() ==# 'n'
+        " Start Terminal-Job mode
+        normal! i
     endif
-    let ch = job_getchannel(job)
-    call ch_sendraw(ch, str)
+
+    call term_sendkeys(self.term_bufnr, str)
 
     if winnr() != prev_winnr
         execute prev_winnr . 'wincmd w'
