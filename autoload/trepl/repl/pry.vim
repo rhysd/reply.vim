@@ -1,3 +1,3 @@
 function! trepl#repl#pry#new() abort
-    return trepl#repl#_base#new({'name' : 'pry'})
+    return trepl#repl#base({'name' : 'pry'})
 endfunction

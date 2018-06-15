@@ -18,29 +18,6 @@ function! s:did_repl_end(repl, exitstatus) abort
     throw trepl#error('BUG: REPL instance is not managed:', a:repl)
 endfunction
 
-function! trepl#lifecycle#start_at(bufnr) abort
-    let filetype = getbufvar(a:bufnr, '&filetype')
-    if filetype ==# ''
-        call trepl#error('No filetype is set for buffer %d', a:bufnr)
-        return
-    endif
-    let source = bufname(a:bufnr)
-    if !filereadable(source)
-        let source = ''
-    endif
-    try
-        let repl = trepl#filetype#new_repl(filetype)
-        call repl.start({
-            \   'source' : source,
-            \   'source_bufnr' : a:bufnr,
-            \   'on_close' : function('s:did_repl_end'),
-            \ })
-        call s:did_repl_start(repl)
-    catch /^trepl.vim: /
-        " Cleanup
-    endtry
-endfunction
-
 function! trepl#lifecycle#new(bufnr) abort
     let filetype = getbufvar(a:bufnr, '&filetype')
     if filetype ==# ''

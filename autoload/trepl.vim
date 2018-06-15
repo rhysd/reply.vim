@@ -1,9 +1,9 @@
 " Common utilities used throughout trepl.vim
 
 function! trepl#error(fmt, ...) abort
-    let msg = a:fmt
+    let msg = 'trepl.vim: ' . a:fmt
     if a:0 != 0
-        let msg = call('printf', [a:fmt] + a:000)
+        let msg = call('printf', [msg] + a:000)
     endif
     echohl ErrorMsg | echomsg msg | echohl None
     return msg

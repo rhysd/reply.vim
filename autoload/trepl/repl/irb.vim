@@ -1,3 +1,3 @@
 function! trepl#repl#irb#new() abort
-    return trepl#repl#_base#new({'name' : 'irb'})
+    return trepl#repl#base({'name' : 'irb'})
 endfunction

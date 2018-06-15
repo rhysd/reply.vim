@@ -100,7 +100,7 @@ function! s:base.stop() abort
     endif
 endfunction
 
-function! trepl#repl#_base#new(config) abort
+function! trepl#repl#base(config) abort
     let r = deepcopy(s:base)
     let r.name = a:config.name
     call trepl#log('Created new REPL instance for', a:config.name)

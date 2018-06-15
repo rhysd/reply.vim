@@ -1,3 +1,3 @@
 function! trepl#repl#ocaml#new() abort
-    return trepl#repl#_base#new({'name' : 'ocaml'})
+    return trepl#repl#base({'name' : 'ocaml'})
 endfunction

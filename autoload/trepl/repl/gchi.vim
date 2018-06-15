@@ -1,3 +1,3 @@
 function! trepl#repl#ghci#new() abort
-    return trepl#repl#_base#new({'name' : 'ghci'})
+    return trepl#repl#base({'name' : 'ghci'})
 endfunction
