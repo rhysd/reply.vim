@@ -20,3 +20,21 @@ function! trepl#command#stop(bang) abort
         call repls[-1].stop()
     endif
 endfunction
+
+" TODO: Support visual mode
+function! trepl#command#send(str) abort
+    let str = a:str
+    if str ==# ''
+        let str = getline('.')
+    endif
+    let bufnr = bufnr('%')
+    let r = trepl#lifecycle#repl_for_buf(bufnr)
+    if r is v:null
+        call trepl#error('No REPL related to buffer #%d was found', bufnr)
+        return
+    endif
+    try:
+        call r.send_string(str)
+    catch /^trepl\.vim: /
+    endtry
+endfunction

@@ -52,7 +52,53 @@ function! s:base.start(context) abort
     let self.running = v:true
 endfunction
 
-" TODO: stop
+" Note: Precondition: Terminal window must exists
+function! s:base.send_string(str) abort
+    if !self.running
+        call trepl#error("REPL '%s' is not running", self.name)
+        return
+    endif
+
+    let str = a:str
+    if str[-1] !=# "\n"
+        let str .= "\n"
+    endif
+
+    let winnr = bufwinnr(self.term_bufnr)
+    if winnr == -1
+        call trepl#error("REPL '%s' is open in window (TODO: Open window if closed)", self.name)
+        return
+    endif
+    let prev_winnr = winnr()
+    execute winnr . 'wincmd w'
+    " TODO: This does not work if the window is not in terminal normal mode
+    normal! i
+
+    let job = term_getjob(self.term_bufnr)
+    if job is v:null
+        throw trepl#error("Job is not found for terminal at buffer #%d", self.term_bufnr)
+    endif
+    let ch = job_getchannel(job)
+    call ch_sendraw(ch, str)
+
+    if winnr() != prev_winnr
+        execute prev_winnr . 'wincmd w'
+    endif
+endfunction
+
+function! s:base.stop() abort
+    if !self.running
+        call trepl#echo("REPL '%s' is not running", self.name)
+        return
+    endif
+    " Maybe needed: call term_setkill(a:repl.term_bufnr, 'term')
+    if bufexists(a:repl.term_bufnr)
+        execute 'bdelete!' a:repl.term_bufnr
+        call trepl#log('Stopped terminal', a:repl.name, 'at', a:repl.term_bufnr)
+    else
+        call trepl#log('Terminal buffer not found for ', a:repl.name, 'at', a:repl.term_bufnr)
+    endif
+endfunction
 
 function! trepl#repl#_base#new(config) abort
     let r = deepcopy(s:base)
