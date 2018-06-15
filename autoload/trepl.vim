@@ -20,3 +20,11 @@ function! trepl#log(...) abort
     endif
     echom '[' . strftime('%T') . '] ' . join(map(copy(a:000), 'string(v:val)'), ' ')
 endfunction
+
+function! trepl#echo(fmt, ...) abort
+    let msg = a:fmt
+    if a:0 > 0
+        let msg = call('printf', [msg] + a:000)
+    endif
+    echo 'trepl.vim: ' . msg
+endfunction

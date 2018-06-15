@@ -41,25 +41,37 @@ function! trepl#lifecycle#start_at(bufnr) abort
     endtry
 endfunction
 
-function! s:stop_repl(repl) abort
-    " Maybe needed: call term_setkill(a:repl.term_bufnr, 'term')
-    if bufexists(a:repl.term_bufnr)
-        execute 'bdelete!' a:repl.term_bufnr
-        call trepl#log('Stopped terminal', a:repl.name, 'at', a:repl.term_bufnr)
-    else
-        call trepl#log('Terminal buffer not found for ', a:repl.name, 'at', a:repl.term_bufnr)
+function! trepl#lifecycle#new(bufnr) abort
+    let filetype = getbufvar(a:bufnr, '&filetype')
+    if filetype ==# ''
+        throw trepl#error('No filetype is set for buffer %d', a:bufnr)
     endif
+
+    let source = bufname(a:bufnr)
+    if !filereadable(source)
+        let source = ''
+    endif
+
+    let repl = trepl#filetype#new_repl(filetype)
+    call repl.start({
+        \   'source' : source,
+        \   'source_bufnr' : a:bufnr,
+        \   'on_close' : function('s:did_repl_end'),
+        \ })
+    call s:did_repl_start(repl)
+    return repl
 endfunction
 
-function! trepl#lifecycle#stop_latest() abort
-    if empty(s:repls)
-        echo 'No REPL is running'
-    endif
-    call s:stop_repl(s:repls[-1])
+function! trepl#lifecycle#all_repls() abort
+    return s:repls
 endfunction
 
-function! trepl#lifecycle#stop_all() abort
+function! trepl#lifecycle#repl_for_buf(bufnr) abort
     for r in s:repls
-        call s:stop_repl(r)
+        if has_key(r.context, 'source_bufnr') && r.context.source_bufnr == a:bufnr ||
+         \ has_key(r, 'term_bufnr') && r.term_bufnr == a:bufnr
+            return r
+        endif
     endfor
+    return v:null
 endfunction

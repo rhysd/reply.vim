@@ -27,6 +27,7 @@ function! s:base._on_close(channel, exitval) abort
     endif
 
     let self.running = v:false
+    unlet self.term_bufnr
 endfunction
 
 " context {
