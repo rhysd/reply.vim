@@ -1,5 +1,14 @@
-" TODO: Manage REPL instances
+" Note: utop does not work on Vim 8.1.26
+let s:default_repls = {
+\   'ruby': ['pry', 'irb'],
+\   'python': ['ptpython', 'python'],
+\   'ocaml': ['ocaml'],
+\   'javascript': ['node'],
+\   'typescript': ['ts_node'],
+\   'haskell': ['ghci'],
+\ }
 
+" All REPLs running and started by trepl.vim
 let s:repls = []
 
 function! s:did_repl_start(repl) abort
@@ -18,24 +27,57 @@ function! s:did_repl_end(repl, exitstatus) abort
     throw trepl#error('BUG: REPL instance is not managed:', a:repl)
 endfunction
 
-function! trepl#lifecycle#new(bufnr) abort
-    let filetype = getbufvar(a:bufnr, '&filetype')
-    if filetype ==# ''
-        throw trepl#error('No filetype is set for buffer %d', a:bufnr)
+function! s:new_repl(name) abort
+    try
+        let repl = trepl#repl#{a:name}#new()
+    catch /^Vim\%((\a\+)\)\=:E117/
+        return v:null
+    endtry
+    if !repl.is_available()
+        return v:null
+    endif
+    return repl
+endfunction
+
+function! s:new_repl_for_filetype(filetype) abort
+    let names = get(trepl#var('repls', {}), a:filetype, get(s:default_repls, a:filetype, []))
+    if empty(names)
+        throw trepl#error("No REPL is selectable for filetype '%s'. Please read `:help g:trepl_repls`", a:filetype)
     endif
 
+    for name in names
+        let repl = s:new_repl(name)
+        if repl isnot v:null
+            return repl
+        endif
+    endfor
+
+    throw trepl#error("No REPL is available for filetype '%s'. Candidates are %s", a:filetype, names)
+endfunction
+
+function! trepl#lifecycle#new(bufnr, name) abort
     let source = bufname(a:bufnr)
     if !filereadable(source)
         let source = ''
     endif
 
-    let repl = trepl#filetype#new_repl(filetype)
+    if a:name ==# ''
+        let filetype = getbufvar(a:bufnr, '&filetype')
+        if filetype ==# ''
+            throw trepl#error('No filetype is set for buffer %d', a:bufnr)
+        endif
+        let repl = s:new_repl_for_filetype(filetype)
+    else
+        let repl = s:new_repl(a:name)
+    endif
+
     call repl.start({
         \   'source' : source,
         \   'source_bufnr' : a:bufnr,
         \   'on_close' : function('s:did_repl_end'),
         \ })
     call s:did_repl_start(repl)
+
     return repl
 endfunction
 

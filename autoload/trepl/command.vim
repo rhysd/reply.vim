@@ -1,3 +1,5 @@
+let s:sfile = expand('<sfile>')
+
 function! s:get_range_text(start, last) abort
     let sl = a:start[1]
     let sc = a:start[2] - 1
@@ -21,12 +23,12 @@ function! s:get_range_text(start, last) abort
 endfunction
 
 " TODO: Support specify name directly
-function! trepl#command#start(bang, has_range, start, last) abort
+function! trepl#command#start(name, bang, has_range, start, last) abort
     if a:has_range
         let text = s:get_range_text(getpos("'<"), getpos("'>"))
     endif
     try
-        let repl = trepl#lifecycle#new(bufnr('%'))
+        let repl = trepl#lifecycle#new(bufnr('%'), a:name)
         if a:has_range
             call repl.send_string(text)
         endif
@@ -38,6 +40,14 @@ function! trepl#command#start(bang, has_range, start, last) abort
         " possible'
         wincmd p
     endif
+endfunction
+
+function! trepl#command#completion_start(arglead, cmdline, cursorpos) abort
+    if !exists('s:all_repl_names')
+        echom string(glob(fnamemodify(s:sfile, ':p:h') . '/repl/*.vim', 1, 1))
+        let s:all_repl_names = map(glob(fnamemodify(s:sfile, ':p:h') . '/repl/*.vim', 1, 1), {_, p -> matchstr(p, '\h\w*\ze\.vim$')})
+    endif
+    return filter(copy(s:all_repl_names), {_, n -> stridx(n, a:arglead) == 0})
 endfunction
 
 function! trepl#command#stop(bang) abort
