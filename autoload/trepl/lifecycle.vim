@@ -11,6 +11,7 @@ let s:default_repls = {
 \   'lua': ['lua'],
 \   'scheme': ['gauche', 'chibi_scheme', 'mit_scheme'],
 \   'go': ['go_pry'],
+\   'lisp': ['sbcl', 'clisp'],
 \ }
 
 " All REPLs running and started by trepl.vim
