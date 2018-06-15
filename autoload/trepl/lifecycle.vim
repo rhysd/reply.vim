@@ -7,6 +7,8 @@ let s:default_repls = {
 \   'typescript': ['ts_node'],
 \   'haskell': ['ghci'],
 \   'swift': ['swift'],
+\   'lua': ['lua'],
+\   'scheme': ['gauche', 'chibi_scheme', 'mit_scheme'],
 \ }
 
 " All REPLs running and started by trepl.vim
