@@ -78,8 +78,7 @@ endfunction
 " Note: Precondition: Terminal window must exists
 function! s:base.send_string(str) abort
     if !self.running
-        call trepl#error("REPL '%s' is not running", self.name)
-        return
+        throw trepl#error("REPL '%s' is not running", self.name)
     endif
 
     let str = a:str
