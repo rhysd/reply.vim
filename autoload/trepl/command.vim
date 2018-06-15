@@ -22,22 +22,29 @@ function! s:get_range_text(start, last) abort
     return join(lines, "\n")
 endfunction
 
-" TODO: Support specify name directly
 function! trepl#command#start(name, bang, has_range, start, last) abort
     if a:has_range
         let text = s:get_range_text(getpos("'<"), getpos("'>"))
     endif
+    let bufnr = bufnr('%')
     try
-        let repl = trepl#lifecycle#new(bufnr('%'), a:name)
+        if a:bang
+            let repl = trepl#lifecycle#new(bufnr, a:name)
+        else
+            let repl = trepl#lifecycle#repl_for_buf(bufnr)
+            if repl isnot v:null
+                call repl.into_terminal_job_mode()
+            else
+                let repl = trepl#lifecycle#new(bufnr, a:name)
+            endif
+        endif
+
         if a:has_range
             call repl.send_string(text)
         endif
     catch /^trepl\.vim: /
     endtry
-    if a:bang || a:has_range
-        " TODO: Change meaning of bang to 'always create a new repl'
-        " and change default behavior to 'use already running REPL if
-        " possible'
+    if a:has_range
         wincmd p
     endif
 endfunction
