@@ -1,4 +1,5 @@
 " Note: utop does not work on Vim 8.1.26
+" Note: gore does not work at all
 let s:default_repls = {
 \   'ruby': ['pry', 'irb'],
 \   'python': ['ptpython', 'python'],
@@ -9,6 +10,7 @@ let s:default_repls = {
 \   'swift': ['swift'],
 \   'lua': ['lua'],
 \   'scheme': ['gauche', 'chibi_scheme', 'mit_scheme'],
+\   'go': ['go_pry'],
 \ }
 
 " All REPLs running and started by trepl.vim
