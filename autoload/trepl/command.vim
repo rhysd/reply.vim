@@ -1,9 +1,12 @@
 " TODO: Support specify name directly
-function! trepl#command#start() abort
+function! trepl#command#start(bang) abort
     try
         call trepl#lifecycle#new(bufnr('%'))
     catch /^trepl\.vim: /
     endtry
+    if a:bang
+        wincmd p
+    endif
 endfunction
 
 function! trepl#command#stop(bang) abort

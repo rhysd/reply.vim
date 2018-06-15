@@ -52,6 +52,29 @@ function! s:base.start(context) abort
     let self.running = v:true
 endfunction
 
+function! s:base.into_terminal_job_mode() abort
+    if bufnr('%') ==# self.term_bufnr
+        if mode() ==# 't'
+            return
+        endif
+        " Start Terminal-Job mode
+        normal! i
+        return
+    endif
+
+    let winnr = bufwinnr(self.term_bufnr)
+    if winnr != -1
+        execute winnr . 'wincmd w'
+    else
+        execute 'vertical sbuffer' self.term_bufnr
+    endif
+
+    if mode() ==# 'n'
+        " Start Terminal-Job mode
+        normal! i
+    endif
+endfunction
+
 " Note: Precondition: Terminal window must exists
 function! s:base.send_string(str) abort
     if !self.running
@@ -66,19 +89,11 @@ function! s:base.send_string(str) abort
 
     " Note: Need to enter Terminal-Job mode for updating the terminal window
 
-    let winnr = bufwinnr(self.term_bufnr)
-    if winnr == -1
-        call trepl#error("REPL '%s' (buf #%d) is open in window (TODO: Open window if closed)", self.name, self.term_bufnr)
-        return
-    endif
     let prev_winnr = winnr()
-    execute winnr . 'wincmd w'
-    if mode() ==# 'n'
-        " Start Terminal-Job mode
-        normal! i
-    endif
+    call self.into_terminal_job_mode()
 
     call term_sendkeys(self.term_bufnr, str)
+    call trepl#log('String was sent to', self.name, ':', str)
 
     if winnr() != prev_winnr
         execute prev_winnr . 'wincmd w'
@@ -91,11 +106,11 @@ function! s:base.stop() abort
         return
     endif
     " Maybe needed: call term_setkill(a:repl.term_bufnr, 'term')
-    if bufexists(a:repl.term_bufnr)
-        execute 'bdelete!' a:repl.term_bufnr
-        call trepl#log('Stopped terminal', a:repl.name, 'at', a:repl.term_bufnr)
+    if bufexists(self.term_bufnr)
+        execute 'bdelete!' self.term_bufnr
+        call trepl#log('Stopped terminal', self.name, 'at', self.term_bufnr)
     else
-        call trepl#log('Terminal buffer not found for ', a:repl.name, 'at', a:repl.term_bufnr)
+        call trepl#log('Terminal buffer not found for ', self.name, 'at', self.term_bufnr)
     endif
 endfunction
 
