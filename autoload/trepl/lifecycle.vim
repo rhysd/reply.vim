@@ -12,7 +12,12 @@ let s:default_repls = {
 \   'scheme': ['gauche', 'chibi_scheme', 'mit_scheme'],
 \   'go': ['go_pry'],
 \   'lisp': ['sbcl', 'clisp'],
+\   'c': ['cling_c'],
+\   'cpp': ['cling'],
+\   'objc': ['cling_objc'],
 \ }
+
+" TODO: Add Scala, Clojure, Kotlin, Dart, Bash, Zsh
 
 " All REPLs running and started by trepl.vim
 let s:repls = []
