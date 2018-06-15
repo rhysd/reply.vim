@@ -6,6 +6,7 @@ let s:default_repls = {
 \   'javascript': ['node'],
 \   'typescript': ['ts_node'],
 \   'haskell': ['ghci'],
+\   'swift': ['swift'],
 \ }
 
 " All REPLs running and started by trepl.vim
