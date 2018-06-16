@@ -1,4 +1,4 @@
-let s:repl = reply#repl#base({'name' : 'mit-scheme'})
+let s:repl = reply#repl#base('mit-scheme')
 
 function! s:repl.executable() abort
     return self.get_var('executable', 'mit-scheme')

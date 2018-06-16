@@ -1,4 +1,4 @@
-let s:repl = reply#repl#base({'name' : 'cling_objc'})
+let s:repl = reply#repl#base('cling_objc')
 
 function! s:repl.executable() abort
     return self.get_var('executable', 'cling')

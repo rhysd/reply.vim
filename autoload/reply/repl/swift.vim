@@ -1,4 +1,4 @@
-let s:repl = reply#repl#base({'name' : 'swift'})
+let s:repl = reply#repl#base('swift')
 
 function! s:repl.get_command() abort
     return [self.executable(), '-repl'] + self.get_var('command_options', [])

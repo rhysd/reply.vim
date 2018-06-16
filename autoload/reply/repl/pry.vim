@@ -1,3 +1,3 @@
 function! reply#repl#pry#new() abort
-    return reply#repl#base({'name' : 'pry'})
+    return reply#repl#base('pry')
 endfunction

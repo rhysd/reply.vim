@@ -1,4 +1,4 @@
-let s:repl = reply#repl#base({'name' : 'fsi'})
+let s:repl = reply#repl#base('fsi')
 
 function! s:repl.is_available() abort
     return has('win32') && executable(self.executable())

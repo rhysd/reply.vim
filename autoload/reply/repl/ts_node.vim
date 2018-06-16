@@ -1,4 +1,4 @@
-let s:repl = reply#repl#base({'name' : 'ts-node'})
+let s:repl = reply#repl#base('ts-node')
 
 function! s:repl.executable() abort
     return self.get_var('executable', 'ts-node')

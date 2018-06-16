@@ -1,4 +1,4 @@
-let s:repl = reply#repl#base({'name' : 'julia'})
+let s:repl = reply#repl#base('julia')
 
 function! s:repl.executable() abort
     let exe = self.get_var('executable', 'julia')

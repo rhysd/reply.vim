@@ -1,3 +1,3 @@
 function! reply#repl#jshell#new() abort
-    return reply#repl#base({'name' : 'jshell'})
+    return reply#repl#base('jshell')
 endfunction

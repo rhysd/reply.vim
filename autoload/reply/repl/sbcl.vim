@@ -1,3 +1,3 @@
 function! reply#repl#sbcl#new() abort
-    return reply#repl#base({'name' : 'sbcl'})
+    return reply#repl#base('sbcl')
 endfunction

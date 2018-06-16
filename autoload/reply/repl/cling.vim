@@ -1,3 +1,3 @@
 function! reply#repl#cling#new() abort
-    return reply#repl#base({'name' : 'cling'})
+    return reply#repl#base('cling')
 endfunction

@@ -1,3 +1,3 @@
 function! reply#repl#node#new() abort
-    return reply#repl#base({'name' : 'node'})
+    return reply#repl#base('node')
 endfunction
