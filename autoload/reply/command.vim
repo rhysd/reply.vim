@@ -22,20 +22,33 @@ function! s:get_range_text(start, last) abort
     return join(lines, "\n")
 endfunction
 
-function! reply#command#start(name, bang, has_range, start, last) abort
+function! reply#command#start(args, bang, has_range, start, last) abort
+    let name = get(a:args, 0, '')
+    if name ==# '--'
+        let name = ''
+    endif
+
+    let dashdash = index(a:args, '--')
+    if dashdash >= 0
+        let cmdopts = a:args[dashdash+1 :]
+    else
+        let cmdopts = []
+    endif
+
     if a:has_range
         let text = s:get_range_text(getpos("'<"), getpos("'>"))
     endif
+
     let bufnr = bufnr('%')
     try
-        if a:bang
-            let repl = reply#lifecycle#new(bufnr, a:name)
+        if a:bang || cmdopts != []
+            let repl = reply#lifecycle#new(bufnr, name, cmdopts)
         else
             let repl = reply#lifecycle#repl_for_buf(bufnr)
             if repl isnot v:null
                 call repl.into_terminal_job_mode()
             else
-                let repl = reply#lifecycle#new(bufnr, a:name)
+                let repl = reply#lifecycle#new(bufnr, name, cmdopts)
             endif
         endif
 
@@ -44,16 +57,30 @@ function! reply#command#start(name, bang, has_range, start, last) abort
         endif
     catch /^reply\.vim: /
     endtry
+
     if a:has_range
         wincmd p
     endif
 endfunction
 
 function! reply#command#completion_start(arglead, cmdline, cursorpos) abort
+    if a:cmdline =~# '^Repl\s\+\h\w*\s\+$'
+        " Note: When `:Repl name `, user is going to input REPL command options.
+        " So complete '--' for leading user input.
+        return ['--']
+    endif
+
+    let dashpos = stridx(a:cmdline, '--')
+    if dashpos >= 0 && a:cursorpos > dashpos
+        " Note: After --, it means command options passed to REPL command
+        " execution.
+        return []
+    endif
+
     if !exists('s:all_repl_names')
-        echom string(glob(fnamemodify(s:sfile, ':p:h') . '/repl/*.vim', 1, 1))
         let s:all_repl_names = map(glob(fnamemodify(s:sfile, ':p:h') . '/repl/*.vim', 1, 1), {_, p -> matchstr(p, '\h\w*\ze\.vim$')})
     endif
+
     return filter(copy(s:all_repl_names), {_, n -> stridx(n, a:arglead) == 0})
 endfunction
 

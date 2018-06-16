@@ -6,7 +6,7 @@ endfunction
 
 
 function! s:repl.get_command() abort
-    return [self.executable(), '-x', 'c']
+    return [self.executable(), '-x', 'c'] + self.get_var('command_options', [])
 endfunction
 
 function! reply#repl#cling_c#new() abort

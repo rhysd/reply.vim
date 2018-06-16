@@ -14,7 +14,9 @@ function! s:base.is_available() abort
 endfunction
 
 function! s:base.get_command() abort
-    return [self.executable()]
+    return [self.executable()] +
+         \ self.get_var('command_options', []) +
+         \ get(self.context, 'cmdopts', [])
 endfunction
 
 function! s:base._on_close(channel, exitval) abort
@@ -33,6 +35,7 @@ endfunction
 " context {
 "   source?: string;
 "   bufname?: string;
+"   cmdopts?: string[];
 " }
 function! s:base.start(context) abort
     let self.context = a:context

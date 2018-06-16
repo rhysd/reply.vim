@@ -76,7 +76,7 @@ function! s:new_repl_for_filetype(filetype) abort
     throw reply#error("No REPL is available for filetype '%s'. Candidates are %s", a:filetype, names)
 endfunction
 
-function! reply#lifecycle#new(bufnr, name) abort
+function! reply#lifecycle#new(bufnr, name, cmdopts) abort
     let source = bufname(a:bufnr)
     if !filereadable(source)
         let source = ''
@@ -96,6 +96,7 @@ function! reply#lifecycle#new(bufnr, name) abort
         \   'source' : source,
         \   'source_bufnr' : a:bufnr,
         \   'on_close' : function('s:did_repl_end'),
+        \   'cmdopts' : a:cmdopts,
         \ })
     call s:did_repl_start(repl)
 

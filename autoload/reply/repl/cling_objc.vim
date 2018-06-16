@@ -8,7 +8,7 @@ endfunction
 function! s:repl.get_command() abort
     " Note: By specifying 'objective-c++', Cling will start ObjC++ mode
     let lang = self.get_var('language', 'objective-c')
-    return [self.executable(), '-x', lang]
+    return [self.executable(), '-x', lang] + self.get_var('command_options', [])
 endfunction
 
 function! reply#repl#cling_objc#new() abort
