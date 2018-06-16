@@ -23,6 +23,8 @@ let s:default_repls = {
 \   'kotlin': ['kotlinc'],
 \   'clojure': ['clojure'],
 \   'java': ['jshell'],
+\   'csharp': ['csi'],
+\   'fsharp': ['fsi'],
 \ }
 
 " TODO: Add Scala, Clojure, Kotlin, Dart, Bash, Zsh
