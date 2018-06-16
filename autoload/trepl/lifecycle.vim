@@ -15,6 +15,8 @@ let s:default_repls = {
 \   'c': ['cling_c'],
 \   'cpp': ['cling'],
 \   'objc': ['cling_objc'],
+\   'sh': ['bash', 'sh'],
+\   'zsh': ['zsh'],
 \ }
 
 " TODO: Add Scala, Clojure, Kotlin, Dart, Bash, Zsh

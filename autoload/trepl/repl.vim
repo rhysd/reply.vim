@@ -85,6 +85,9 @@ function! s:base.send_string(str) abort
     if str[-1] !=# "\n"
         let str .= "\n"
     endif
+    " Note: Zsh distinguishes <NL> and <CR> and regards <NL> as <C-j>.
+    " We always use <CR> as newline character.
+    let str = substitute(str, "\n", "\<CR>", 'g')
 
     " Note: Need to enter Terminal-Job mode for updating the terminal window
 
