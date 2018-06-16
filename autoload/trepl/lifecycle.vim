@@ -17,6 +17,7 @@ let s:default_repls = {
 \   'objc': ['cling_objc'],
 \   'sh': ['bash', 'sh'],
 \   'zsh': ['zsh'],
+\   'julia': ['julia'],
 \ }
 
 " TODO: Add Scala, Clojure, Kotlin, Dart, Bash, Zsh
