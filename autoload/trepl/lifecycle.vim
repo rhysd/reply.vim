@@ -19,6 +19,10 @@ let s:default_repls = {
 \   'zsh': ['zsh'],
 \   'julia': ['julia'],
 \   'crystal': ['icr'],
+\   'scala': ['scala'],
+\   'kotlin': ['kotlinc'],
+\   'clojure': ['clojure'],
+\   'java': ['jshell'],
 \ }
 
 " TODO: Add Scala, Clojure, Kotlin, Dart, Bash, Zsh
