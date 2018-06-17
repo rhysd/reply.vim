@@ -60,6 +60,7 @@ function! s:new_repl(name) abort
         call reply#log(name, 'is not available')
         return v:null
     endif
+    call reply#log('Created new REPL instance for', repl.name)
     return repl
 endfunction
 

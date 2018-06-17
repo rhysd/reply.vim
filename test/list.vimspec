@@ -1,0 +1,10 @@
+Describe :ReplList
+    It shows list of REPLs
+        ReplList
+        " At least 10 REPLs are defined
+        let lines = split(execute('mes', ''), "\n")[-10:]
+        for line in lines
+            Assert Match(line, '^[[:alnum:]_-]\+\%( \[NOT INSTALLED]\)\=$')
+        endfor
+    End
+End

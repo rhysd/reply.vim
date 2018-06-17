@@ -134,6 +134,5 @@ function! reply#repl#base(config) abort
     endif
     let r = deepcopy(s:base)
     let r.name = name
-    call reply#log('Created new REPL instance for', name)
     return r
 endfunction

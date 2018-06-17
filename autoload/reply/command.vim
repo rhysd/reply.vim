@@ -22,6 +22,13 @@ function! s:get_range_text(start, last) abort
     return join(lines, "\n")
 endfunction
 
+function! s:repl_names() abort
+    if !exists('s:repl_names_cache')
+        let s:repl_names_cache = map(glob(fnamemodify(s:sfile, ':p:h') . '/repl/*.vim', 1, 1), {_, p -> substitute(matchstr(p, '\h\w*\ze\.vim$'), '_', '-', 'g')})
+    endif
+    return s:repl_names_cache
+endfunction
+
 function! reply#command#start(args, bang, has_range, start, last) abort
     let name = get(a:args, 0, '')
     if name ==# '--'
@@ -77,11 +84,7 @@ function! reply#command#completion_start(arglead, cmdline, cursorpos) abort
         return []
     endif
 
-    if !exists('s:all_repl_names')
-        let s:all_repl_names = map(glob(fnamemodify(s:sfile, ':p:h') . '/repl/*.vim', 1, 1), {_, p -> substitute(matchstr(p, '\h\w*\ze\.vim$'), '_', '-', 'g')})
-    endif
-
-    return filter(copy(s:all_repl_names), {_, n -> stridx(n, a:arglead) == 0})
+    return filter(copy(s:repl_names()), {_, n -> stridx(n, a:arglead) == 0})
 endfunction
 
 function! reply#command#stop(bang) abort
@@ -118,4 +121,16 @@ function! reply#command#send(str, line_start, line_end) abort
         call r.send_string(str)
     catch /^reply\.vim: /
     endtry
+endfunction
+
+function! reply#command#list() abort
+    for name in s:repl_names()
+        let api = substitute(name, '-', '_', 'g')
+        let repl = reply#repl#{api}#new()
+        if repl.is_available()
+            echom name
+        else
+            echohl Comment | echom name . ' [NOT INSTALLED]' | echohl None
+        endif
+    endfor
 endfunction
