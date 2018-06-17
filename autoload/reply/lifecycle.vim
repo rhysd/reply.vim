@@ -50,7 +50,6 @@ endfunction
 
 function! s:new_repl(name) abort
     let name = substitute(a:name, '-', '_', 'g')
-    echom name
     try
         let repl = reply#repl#{name}#new()
     catch /^Vim\%((\a\+)\)\=:E117/

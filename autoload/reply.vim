@@ -14,13 +14,6 @@ function! reply#var(name, default) abort
     return get(b:, v, get(g:, v, a:default))
 endfunction
 
-function! reply#log(...) abort
-    if !reply#var('_enable_debug', 0)
-        return
-    endif
-    echom '[' . strftime('%T') . '] ' . join(map(copy(a:000), 'string(v:val)'), ' ')
-endfunction
-
 if reply#var('_enable_debug', 0)
     function! reply#log(...) abort
         echom '[' . strftime('%T') . '] ' . join(map(copy(a:000), 'type(v:val) == v:t_string ? v:val : string(v:val)'), ' ')

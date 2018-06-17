@@ -81,7 +81,7 @@ endfunction
 " Note: Precondition: Terminal window must exists
 function! s:base.send_string(str) abort
     if !self.running
-        throw reply#error("REPL '%s' is not running", self.name)
+        throw reply#error("REPL '%s' is no longer running", self.name)
     endif
 
     let str = a:str

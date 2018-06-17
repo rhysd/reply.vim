@@ -71,7 +71,7 @@ function! reply#command#start(args, bang, has_range, start, last) abort
 endfunction
 
 function! reply#command#completion_start(arglead, cmdline, cursorpos) abort
-    if a:cmdline =~# '^Repl\s\+\h\w*\s\+$'
+    if a:cmdline =~# '^Repl\s\+\h[[:alnum:]-_]*\s\+$'
         " Note: When `:Repl name `, user is going to input REPL command options.
         " So complete '--' for leading user input.
         return ['--']
