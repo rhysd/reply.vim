@@ -78,7 +78,7 @@ function! reply#command#completion_start(arglead, cmdline, cursorpos) abort
     endif
 
     if !exists('s:all_repl_names')
-        let s:all_repl_names = map(glob(fnamemodify(s:sfile, ':p:h') . '/repl/*.vim', 1, 1), {_, p -> matchstr(p, '\h\w*\ze\.vim$')})
+        let s:all_repl_names = map(glob(fnamemodify(s:sfile, ':p:h') . '/repl/*.vim', 1, 1), {_, p -> substitute(matchstr(p, '\h\w*\ze\.vim$'), '_', '-', 'g')})
     endif
 
     return filter(copy(s:all_repl_names), {_, n -> stridx(n, a:arglead) == 0})

@@ -23,7 +23,7 @@ endfunction
 
 if reply#var('_enable_debug', 0)
     function! reply#log(...) abort
-        echom '[' . strftime('%T') . '] ' . join(map(copy(a:000), 'string(v:val)'), ' ')
+        echom '[' . strftime('%T') . '] ' . join(map(copy(a:000), 'type(v:val) == v:t_string ? v:val : string(v:val)'), ' ')
     endfunction
 else
     function! reply#log(...) abort
