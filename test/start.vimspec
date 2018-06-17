@@ -1,0 +1,47 @@
+Describe :Repl
+    Before each
+        new!
+    End
+
+    After each
+        bdelete!
+        for b in term_list()
+            execute 'bdelete!' b
+        endfor
+    End
+
+    It does not open terminal when any REPL cannot be located
+        Repl
+        Assert LastMessage('reply.vim: No filetype is set for buffer 3')
+        Assert Empty(term_list())
+    End
+
+    It opens REPL terminal for 'javascript' filetype
+        setf javascript
+        Repl
+        Assert Equals(mode(), 't')
+        Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
+        Assert Equals(getline('.'), '> ')
+        Assert Equals(bufname('%'), 'reply: node')
+        call term_sendkeys(bufnr('%'), "1 + 1\<CR>")
+        Assert True(WithTimeout(1, {-> line('$') !=# 1}))
+        Assert Equals(getline(1, '$'), ['> 1 + 1', '2', '> '])
+        ReplStop
+        Assert Empty(term_list())
+        Assert Equals(mode(), 'n')
+    End
+
+    It opens REPL terminal for 'node'
+        Repl node
+        Assert Equals(mode(), 't')
+        Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
+        Assert Equals(getline('.'), '> ')
+        Assert Equals(bufname('%'), 'reply: node')
+        call term_sendkeys(bufnr('%'), "1 + 1\<CR>")
+        Assert True(WithTimeout(1, {-> line('$') !=# 1}))
+        Assert Equals(getline(1, '$'), ['> 1 + 1', '2', '> '])
+        ReplStop
+        Assert Empty(term_list())
+        Assert Equals(mode(), 'n')
+    End
+End

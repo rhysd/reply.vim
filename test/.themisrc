@@ -1,0 +1,43 @@
+call themis#option('exclude', 'test/Guardfile')
+
+function! WithTimeout(timeout, pred) abort
+    let total = 0
+    while !a:pred()
+        sleep 100m
+        let total += 0.1
+        if total >= a:timeout
+            return 0
+        endif
+    endwhile
+    return 1
+endfunction
+
+function! AssertLastMessage(expected) abort
+    let mes = split(execute('mes', ''), "\n")
+    let last = mes[len(mes)-1]
+    if last !=# a:expected
+        throw themis#failure(printf("Last message mismatched\n  Expected: '%s'\n  Actual:   '%s'", a:expected, last))
+    endif
+    return 1
+endfunction
+
+function! AssertContains(heystack, needle) abort
+    if type(a:heystack) is v:t_string
+        let contains = stridx(a:heystack, a:needle) >= 0
+    else
+        let contains = index(a:heystack, a:needle) >= 0
+    endif
+    if !contains
+        throw themis#failure(printf('%s is not contained in %s', string(a:needle), string(a:heystack)))
+    endif
+    return 1
+endfunction
+
+let s:helper = themis#helper('assert')
+let s:helper['last_message'] = function('AssertLastMessage')
+let s:helper['contains'] = function('AssertContains')
+call themis#helper('command').with(s:helper)
+
+call themis#helper('command').with(themis#helper('assert'))
+
+let g:reply__enable_debug = 1
