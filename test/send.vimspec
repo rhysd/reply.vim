@@ -1,0 +1,50 @@
+Describe ReplSend
+    Before each
+        new!
+        Repl node
+        let term_winnr = winnr()
+        call WithTimeout(1, {-> getline('.') !=# ''})
+        wincmd p
+    End
+
+    After each
+        bdelete!
+        for b in term_list()
+            execute 'bdelete!' b
+        endfor
+    End
+
+    It sends text to terminal window as arguments
+        ReplSend 1 + 1
+        execute term_winnr . 'wincmd w'
+        Assert True(WithTimeout(1, {-> line('$') > 1}))
+        Assert Equals(getline(1, '$'), ['> 1 + 1', '2', '> '])
+    End
+
+    It sends current line to terminal window
+        call setline('.', ['1 + 1'])
+        ReplSend
+        execute term_winnr . 'wincmd w'
+        Assert True(WithTimeout(1, {-> line('$') > 1}))
+        Assert Equals(getline(1, '$'), ['> 1 + 1', '2', '> '])
+    End
+
+    It sends selected lines to terminal window in visual mode
+        call setline('.', ['function hello(name) {', '  console.log("hello,", name);', '}', 'hello("Vim");'])
+        normal! ggVGygv
+        '<,'>ReplSend
+        execute term_winnr . 'wincmd w'
+        Assert True(WithTimeout(1, {-> line('$') > 1}))
+        let expected = [
+        \   '> function hello(name) {',
+        \   '...   console.log("hello,", name);',
+        \   '... }',
+        \   'undefined',
+        \   '> hello("Vim");',
+        \   'hello, Vim',
+        \   'undefined',
+        \   '> ',
+        \ ]
+        Assert Equals(getline(1, '$'), expected)
+    End
+End

@@ -1,0 +1,45 @@
+Describe :ReplStop
+    Before each
+        new!
+    End
+
+    After each
+        bdelete!
+        for b in term_list()
+            execute 'bdelete!' b
+        endfor
+    End
+
+    It closes terminal window and remove terminal buffer
+        Repl node
+        let b = bufnr('%')
+        Assert Equals(term_list()[0], b)
+        ReplStop
+        Assert Empty(term_list())
+        Assert Equals(bufwinnr(b), -1)
+    End
+
+    It closes only the latest terminal window
+        Repl node
+        let b1 = bufnr('%')
+        Repl! node
+        let b2 = bufnr('%')
+        ReplStop
+        Assert Equals(term_list(), [b1])
+        Assert Equals(bufwinnr(b2), -1)
+    End
+
+    It closes all terminal windows with bang
+        let b = bufnr('%')
+        Repl node
+        let b1 = bufnr('%')
+        Repl! node
+        let b2 = bufnr('%')
+        ReplStop!
+        Assert Empty(term_list())
+        Assert Equals(bufwinnr(b1), -1)
+        Assert Equals(bufwinnr(b2), -1)
+        " Back to the original buffer since all buffers were closed
+        Assert Equals(bufnr('%'), b)
+    End
+End

@@ -15,7 +15,7 @@ endfunction
 function! AssertLastMessage(expected) abort
     let mes = split(execute('mes', ''), "\n")
     let last = mes[len(mes)-1]
-    if last !=# a:expected
+    if stridx(last, a:expected) == -1
         throw themis#failure(printf("Last message mismatched\n  Expected: '%s'\n  Actual:   '%s'", a:expected, last))
     endif
     return 1

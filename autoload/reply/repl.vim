@@ -112,7 +112,11 @@ function! s:base.stop() abort
     endif
     " Maybe needed: call term_setkill(a:repl.term_bufnr, 'term')
     if bufexists(self.term_bufnr)
-        execute 'bdelete!' self.term_bufnr
+        try
+            execute 'bdelete!' self.term_bufnr
+        catch /^Vim\%((\a\+)\)\=:E516/
+            " When the buffer is already deleted, skip deleting it
+        endtry
         call reply#log('Stopped terminal', self.name, 'at', self.term_bufnr)
     else
         call reply#log('Terminal buffer not found for ', self.name, 'at', self.term_bufnr)
