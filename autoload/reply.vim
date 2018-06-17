@@ -21,6 +21,15 @@ function! reply#log(...) abort
     echom '[' . strftime('%T') . '] ' . join(map(copy(a:000), 'string(v:val)'), ' ')
 endfunction
 
+if reply#var('_enable_debug', 0)
+    function! reply#log(...) abort
+        echom '[' . strftime('%T') . '] ' . join(map(copy(a:000), 'string(v:val)'), ' ')
+    endfunction
+else
+    function! reply#log(...) abort
+    endfunction
+endif
+
 function! reply#echo(fmt, ...) abort
     let msg = a:fmt
     if a:0 > 0

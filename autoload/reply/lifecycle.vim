@@ -49,12 +49,15 @@ function! s:did_repl_end(repl, exitstatus) abort
 endfunction
 
 function! s:new_repl(name) abort
+    let name = substitute(a:name, '-', '_', 'g')
+    echom name
     try
-        let repl = reply#repl#{a:name}#new()
+        let repl = reply#repl#{name}#new()
     catch /^Vim\%((\a\+)\)\=:E117/
         return v:null
     endtry
     if !repl.is_available()
+        call reply#log(name, 'is not available')
         return v:null
     endif
     return repl
@@ -88,8 +91,13 @@ function! reply#lifecycle#new(bufnr, name, cmdopts) abort
             throw reply#error('No filetype is set for buffer %d', a:bufnr)
         endif
         let repl = s:new_repl_for_filetype(filetype)
+        call reply#log('REPL', repl.name, 'was selected based on filetype', filetype)
     else
         let repl = s:new_repl(a:name)
+        if repl is v:null
+            throw reply#error("REPL '%s' is not defined or not installed", a:name)
+        endif
+        call reply#log('REPL', repl.name, 'was selected based on specified name')
     endif
 
     call repl.start({
