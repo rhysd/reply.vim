@@ -1,5 +1,7 @@
 " Common utilities used throughout reply.vim
 
+let s:path_sep = has('win32') ? '\' : '/'
+
 function! reply#error(fmt, ...) abort
     let msg = 'reply.vim: ' . a:fmt
     if a:0 != 0
@@ -29,4 +31,16 @@ function! reply#echo(fmt, ...) abort
         let msg = call('printf', [msg] + a:000)
     endif
     echo 'reply.vim: ' . msg
+endfunction
+
+function! reply#find_npm_executable(bin) abort
+    let node_modules = finddir('node_modules', ';')
+    if node_modules ==# ''
+        return ''
+    endif
+    let executable = printf('%s%s.bin%s%s', fnamemodify(node_modules, ':p'), s:path_sep, s:path_sep, a:bin)
+    if !filereadable(executable)
+        return ''
+    endif
+    return executable
 endfunction

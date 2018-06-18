@@ -1,7 +1,7 @@
 let s:base = {}
 
 function! s:base.get_var(name, default) abort
-    let v = 'reply_repl_' . self.name . '_' . a:name
+    let v = 'reply_repl_' . self.path_name . '_' . a:name
     return get(b:, v, get(g:, v, a:default))
 endfunction
 
@@ -134,5 +134,6 @@ function! reply#repl#base(config) abort
     endif
     let r = deepcopy(s:base)
     let r.name = name
+    let r.path_name = substitute(name, '-', '_', 'g')
     return r
 endfunction

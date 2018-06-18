@@ -2,7 +2,7 @@ let s:repl = reply#repl#base('julia')
 
 function! s:repl.executable() abort
     let exe = self.get_var('executable', 'julia')
-    if !executable(exe) && has('mac')
+    if  has('mac') && !executable(exe)
         " Julia is distributed in .app format. It may be installed in
         " Applications directory and executable is put in it.
         let paths = glob('/Applications/Julia-*.app/Contents/Resources/julia/bin/julia', 1, 1)

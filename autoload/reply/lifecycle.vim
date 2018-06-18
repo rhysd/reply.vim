@@ -4,7 +4,7 @@ let s:default_repls = {
 \   'ruby': ['pry', 'irb'],
 \   'python': ['ptpython', 'python'],
 \   'ocaml': ['ocaml'],
-\   'javascript': ['node'],
+\   'javascript': ['node', 'd8', 'electron'],
 \   'typescript': ['ts_node'],
 \   'haskell': ['ghci'],
 \   'swift': ['swift'],
@@ -25,16 +25,21 @@ let s:default_repls = {
 \   'java': ['jshell'],
 \   'csharp': ['csi'],
 \   'fsharp': ['fsi'],
+\   'php': ['psysh', 'php'],
+\   'sml': ['sml'],
+\   'groovy': ['groovysh'],
+\   'erlang': ['erl'],
+\   'elixir': ['iex'],
+\   'r': ['R'],
 \ }
-
-" TODO: Add Scala, Clojure, Kotlin, Dart, Bash, Zsh
+" TODO: Add Devel::REPL support for Perl
 
 " All REPLs running and started by reply.vim
 let s:repls = []
 
 function! s:did_repl_start(repl) abort
     let s:repls += [a:repl]
-    call reply#log(a:repl.name, 'started. curent state:', s:repls)
+    call reply#log(a:repl.name, 'started. current state:', s:repls)
 endfunction
 
 function! s:did_repl_end(repl, exitstatus) abort
