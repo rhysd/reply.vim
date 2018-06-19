@@ -94,7 +94,7 @@ function! reply#command#stop(bang) abort
         return
     endif
 
-    let repls = reply#lifecycle#all_repls()
+    let repls = reply#lifecycle#running_repls()
     if a:bang
         for r in copy(repls)
             call r.stop()

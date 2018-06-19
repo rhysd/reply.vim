@@ -57,6 +57,11 @@ Describe :Repl
         Assert Equals(getline(1, '$')[-3:-2], ['> 1 + 1', '2'])
     End
 
+    It shows an error when a specified REPL is not defined
+        Repl not-existing-repl-name
+        Assert LastMessage("reply.vim: REPL 'not-existing-repl-name' is not defined or not installed")
+    End
+
     " TODO: Test :Repl! to open multiple terminals from the same buffer
     " TODO: Test :Repl to open each terminal for each buffer
     " TODO: Test :Repl to regard g:reply_repls

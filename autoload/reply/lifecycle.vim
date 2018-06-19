@@ -50,7 +50,7 @@ function! s:did_repl_end(repl, exitstatus) abort
             return
         endif
     endfor
-    throw reply#error('BUG: REPL instance is not managed:', a:repl)
+    throw reply#error('BUG: REPL instance is not managed: %s', string(a:repl))
 endfunction
 
 function! s:new_repl(name) abort
@@ -116,8 +116,8 @@ function! reply#lifecycle#new(bufnr, name, cmdopts) abort
     return repl
 endfunction
 
-function! reply#lifecycle#all_repls() abort
-    return s:repls
+function! reply#lifecycle#running_repls() abort
+    return filter(copy(s:repls), {_, r -> r.running})
 endfunction
 
 function! reply#lifecycle#repl_for_buf(bufnr) abort

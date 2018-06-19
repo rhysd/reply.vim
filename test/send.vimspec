@@ -47,4 +47,15 @@ Describe ReplSend
         \ ]
         Assert Equals(getline(1, '$'), expected)
     End
+
+    It does nothing when terminal is not started
+        " Ensure all terminals are closed
+        for b in term_list()
+            execute 'bdelete!' b
+        endfor
+        call WithTimeout(1, {-> empty(reply#lifecycle#running_repls())})
+
+        ReplSend foo
+        Assert LastMessage('reply.vim: No REPL related to buffer #' . bufnr('%') . ' was found')
+    End
 End
