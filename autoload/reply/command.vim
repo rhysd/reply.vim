@@ -124,13 +124,16 @@ function! reply#command#send(str, line_start, line_end) abort
 endfunction
 
 function! reply#command#list() abort
-    for name in s:repl_names()
-        let api = substitute(name, '-', '_', 'g')
-        let repl = reply#repl#{api}#new()
-        if repl.is_available()
-            echom name
-        else
-            echohl Comment | echom name . ' [NOT INSTALLED]' | echohl None
-        endif
+    let repl_names = reply#lifecycle#default_repl_names()
+    for filetype in sort(keys(repl_names))
+        for name in repl_names[filetype]
+            let repl = reply#repl#{name}#new()
+            if !repl.is_available()
+                echohl Comment | echom printf('%s (%s) [NOT INSTALLED]', name, filetype) | echohl None
+                continue
+            endif
+            echohl Title | echo name | echohl None
+            echon printf(' (%s)', filetype)
+        endfor
     endfor
 endfunction

@@ -38,6 +38,6 @@ let s:helper['last_message'] = function('AssertLastMessage')
 let s:helper['contains'] = function('AssertContains')
 call themis#helper('command').with(s:helper)
 
-call themis#helper('command').with(themis#helper('assert'))
+let g:reply__enable_debug = 0
 
-let g:reply__enable_debug = 1
+" vim: ft=vim

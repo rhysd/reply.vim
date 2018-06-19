@@ -129,3 +129,7 @@ function! reply#lifecycle#repl_for_buf(bufnr) abort
     endfor
     return v:null
 endfunction
+
+function! reply#lifecycle#default_repl_names() abort
+    return s:default_repls
+endfunction
