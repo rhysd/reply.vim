@@ -1,3 +1,5 @@
+let g:repo_root = fnamemodify(expand('<sfile>'), ':h:h')
+
 call themis#option('exclude', 'test/Guardfile')
 
 function! WithTimeout(timeout, pred) abort

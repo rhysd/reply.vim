@@ -1,4 +1,5 @@
 let s:sfile = expand('<sfile>')
+let s:path_sep = has('win32') ? '\' : '/'
 
 function! s:get_range_text(start, last) abort
     let sl = a:start[1]
@@ -24,7 +25,8 @@ endfunction
 
 function! s:repl_names() abort
     if !exists('s:repl_names_cache')
-        let s:repl_names_cache = map(glob(fnamemodify(s:sfile, ':p:h') . '/repl/*.vim', 1, 1), {_, p -> substitute(matchstr(p, '\h\w*\ze\.vim$'), '_', '-', 'g')})
+        let globpath = fnamemodify(s:sfile, ':p:h') . s:path_sep . 'repl' . s:path_sep . '*.vim'
+        let s:repl_names_cache = map(glob(globpath, 1, 1), {_, p -> substitute(matchstr(p, '\h\w*\ze\.vim$'), '_', '-', 'g')})
     endif
     return s:repl_names_cache
 endfunction

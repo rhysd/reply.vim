@@ -1,10 +1,21 @@
 Describe :ReplList
     It shows list of REPLs
-        ReplList
-        " At least 10 REPLs are defined
-        let lines = split(execute('mes', ''), "\n")[-10:]
+        let paths = glob(join([g:repo_root, 'autoload', 'reply', 'repl', '*.vim'], has('win32') ? '\' : '/'), 1, 1)
+        let names = map(paths, {_, p -> matchstr(p, '\h\w*\ze\.vim$')})
+
+        redir => output
+            ReplList
+        redir END
+
+        let lines = split(output, "\n")[-len(names):]
         for line in lines
-            Assert Match(line, '^[[:alnum:]_-]\+\%( \[NOT INSTALLED]\)\=$')
+            let m = matchlist(line, '^\([[:alnum:]_-]\+\) (\h\w*)\%( \[NOT INSTALLED]\)\=$')
+            Assert NotEmpty(m)
+            let idx = index(names, m[1])
+            Assert True(idx >= 0, m[1] . ' not in ' . string(names))
+            call remove(names, idx)
         endfor
+
+        Assert Empty(names)
     End
 End
