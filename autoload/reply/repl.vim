@@ -19,13 +19,19 @@ function! s:base.get_command() abort
          \ get(self.context, 'cmdopts', [])
 endfunction
 
-function! s:base._on_close(channel, exitval) abort
+function! s:base._on_exit(channel, exitval) abort
+    call reply#log('exit_cb callback with status', a:exitval, 'for', self.name)
+
     if has_key(self.context, 'on_close')
         call self.context.on_close(self, a:exitval)
     endif
 
-    if has_key(self, 'hooks') && has_key(self, 'on_close')
+    if has_key(self, 'hooks') && has_key(self.hooks, 'on_close')
         call self.hooks.on_close(self, a:exitval)
+    endif
+
+    if a:exitval != 0
+        call reply#error("REPL %s exited with status %d\n", self.name, a:exitval)
     endif
 
     let self.running = v:false
@@ -48,7 +54,7 @@ function! s:base.start(context) abort
         \   'term_name' : 'reply: ' . self.name,
         \   'vertical' : 1,
         \   'term_finish' : 'close',
-        \   'exit_cb' : self._on_close,
+        \   'exit_cb' : self._on_exit,
         \ })
     call reply#log('Start terminal at', bufnr, 'with command', cmd)
     let self.term_bufnr = bufnr
