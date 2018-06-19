@@ -31,7 +31,19 @@ function! s:repl_names() abort
     return s:repl_names_cache
 endfunction
 
+function! s:not_supported() abort
+    if !has('nvim') && (v:version >= 801 || v:version == 800 && has('patch803'))
+        return 0
+    endif
+    call reply#error('This version is not supported. reply.vim requires Vim 8.0.803 or later')
+    return 1
+endfunction
+
 function! reply#command#start(args, bang, has_range, start, last) abort
+    if s:not_supported()
+        return
+    endif
+
     let name = get(a:args, 0, '')
 
     if len(a:args) >= 2
@@ -78,6 +90,10 @@ function! reply#command#completion_start(arglead, cmdline, cursorpos) abort
 endfunction
 
 function! reply#command#stop(bang) abort
+    if s:not_supported()
+        return
+    endif
+
     let repls = reply#lifecycle#all_repls()
     if a:bang
         for r in copy(repls)
@@ -93,6 +109,10 @@ function! reply#command#stop(bang) abort
 endfunction
 
 function! reply#command#send(str, line_start, line_end) abort
+    if s:not_supported()
+        return
+    endif
+
     let str = a:str
     if str ==# ''
         if a:line_start == a:line_end
@@ -101,12 +121,14 @@ function! reply#command#send(str, line_start, line_end) abort
             let str = s:get_range_text(getpos("'<"), getpos("'>"))
         endif
     endif
+
     let bufnr = bufnr('%')
     let r = reply#lifecycle#repl_for_buf(bufnr)
     if r is v:null
         call reply#error('No REPL related to buffer #%d was found', bufnr)
         return
     endif
+
     try
         call r.send_string(str)
     catch /^reply\.vim: /
@@ -114,6 +136,10 @@ function! reply#command#send(str, line_start, line_end) abort
 endfunction
 
 function! reply#command#list() abort
+    if s:not_supported()
+        return
+    endif
+
     let repl_names = reply#lifecycle#default_repl_names()
     for filetype in sort(keys(repl_names))
         for name in repl_names[filetype]
