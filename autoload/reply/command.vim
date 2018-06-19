@@ -33,13 +33,9 @@ endfunction
 
 function! reply#command#start(args, bang, has_range, start, last) abort
     let name = get(a:args, 0, '')
-    if name ==# '--'
-        let name = ''
-    endif
 
-    let dashdash = index(a:args, '--')
-    if dashdash >= 0
-        let cmdopts = a:args[dashdash+1 :]
+    if len(a:args) >= 2
+        let cmdopts = a:args[1 :]
     else
         let cmdopts = []
     endif
@@ -73,16 +69,8 @@ function! reply#command#start(args, bang, has_range, start, last) abort
 endfunction
 
 function! reply#command#completion_start(arglead, cmdline, cursorpos) abort
-    if a:cmdline =~# '^Repl\s\+\h[[:alnum:]-_]*\s\+$'
-        " Note: When `:Repl name `, user is going to input REPL command options.
-        " So complete '--' for leading user input.
-        return ['--']
-    endif
-
-    let dashpos = stridx(a:cmdline, '--')
-    if dashpos >= 0 && a:cursorpos > dashpos
-        " Note: After --, it means command options passed to REPL command
-        " execution.
+    let tokens = split(a:cmdline, '\s\+')
+    if len(tokens) > 2 || len(tokens) == 2 && a:cmdline =~# '\s$'
         return []
     endif
 

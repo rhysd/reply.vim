@@ -100,7 +100,7 @@ function! reply#lifecycle#new(bufnr, name, cmdopts) abort
     else
         let repl = s:new_repl(a:name)
         if repl is v:null
-            throw reply#error("REPL '%s' is not defined or not installed", a:name)
+            throw reply#error("REPL '%s' is not defined or not installed. Please check :ReplList", a:name)
         endif
         call reply#log('REPL', repl.name, 'was selected based on specified name')
     endif

@@ -33,7 +33,7 @@ function! s:base._on_exit(channel, exitval) abort
     if a:exitval == 0
         call self.stop()
     else
-        call reply#error('REPL %s exited with status %d', self.name, a:exitval)
+        call reply#error("REPL '%s' exited with status %d", self.name, a:exitval)
     endif
 
     let self.running = v:false
