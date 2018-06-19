@@ -55,7 +55,7 @@ function! reply#command#start(args, bang, has_range, start, last) abort
         else
             let repl = reply#lifecycle#repl_for_buf(bufnr)
             if repl isnot v:null
-                call repl.into_terminal_job_mode()
+                call repl.into_terminal_window()
             else
                 let repl = reply#lifecycle#new(bufnr, name, cmdopts)
             endif

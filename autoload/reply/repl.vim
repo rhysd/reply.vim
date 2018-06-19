@@ -30,8 +30,10 @@ function! s:base._on_exit(channel, exitval) abort
         call self.hooks.on_close(self, a:exitval)
     endif
 
-    if a:exitval != 0
-        call reply#error("REPL %s exited with status %d\n", self.name, a:exitval)
+    if a:exitval == 0
+        call self.stop()
+    else
+        call reply#error('REPL %s exited with status %d', self.name, a:exitval)
     endif
 
     let self.running = v:false
@@ -53,7 +55,7 @@ function! s:base.start(context) abort
     let bufnr = term_start(cmd, {
         \   'term_name' : 'reply: ' . self.name,
         \   'vertical' : 1,
-        \   'term_finish' : 'close',
+        \   'term_finish' : 'open',
         \   'exit_cb' : self._on_exit,
         \ })
     call reply#log('Start terminal at', bufnr, 'with command', cmd)
@@ -61,13 +63,15 @@ function! s:base.start(context) abort
     let self.running = v:true
 endfunction
 
-function! s:base.into_terminal_job_mode() abort
+function! s:base.into_terminal_window() abort
     if bufnr('%') ==# self.term_bufnr
         if mode() ==# 't'
             return
         endif
-        " Start Terminal-Job mode
-        normal! i
+        " Start Terminal-Job mode if job is alive
+        if &modifiable
+            normal! i
+        endif
         return
     endif
 
@@ -78,8 +82,8 @@ function! s:base.into_terminal_job_mode() abort
         execute 'vertical sbuffer' self.term_bufnr
     endif
 
-    if mode() ==# 'n'
-        " Start Terminal-Job mode
+    if mode() ==# 'n' && &modifiable
+        " Start Terminal-Job mode if job is alive
         normal! i
     endif
 endfunction
@@ -101,7 +105,7 @@ function! s:base.send_string(str) abort
     " Note: Need to enter Terminal-Job mode for updating the terminal window
 
     let prev_winnr = winnr()
-    call self.into_terminal_job_mode()
+    call self.into_terminal_window()
 
     call term_sendkeys(self.term_bufnr, str)
     call reply#log('String was sent to', self.name, ':', str)
@@ -125,7 +129,7 @@ function! s:base.stop() abort
         endtry
         call reply#log('Stopped terminal', self.name, 'at', self.term_bufnr)
     else
-        call reply#log('Terminal buffer not found for ', self.name, 'at', self.term_bufnr)
+        call reply#log('Terminal buffer to close is not found for ', self.name, 'at', self.term_bufnr)
     endif
 endfunction
 
