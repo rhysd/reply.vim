@@ -63,7 +63,7 @@ function! reply#command#start(args, bang, has_range, start, last) abort
         else
             let repl = reply#lifecycle#repl_for_buf(bufnr)
             if repl isnot v:null
-                call repl.into_terminal_window()
+                call repl.into_terminal_job_mode()
             else
                 let repl = reply#lifecycle#new(bufnr, name, cmdopts)
             endif
@@ -75,7 +75,7 @@ function! reply#command#start(args, bang, has_range, start, last) abort
     catch /^reply\.vim: /
     endtry
 
-    if a:has_range
+    if a:has_range && bufnr != bufnr('%')
         wincmd p
     endif
 endfunction
@@ -129,6 +129,11 @@ function! reply#command#send(str, line_start, line_end) abort
         return
     endif
 
+    if !r.running
+        call reply#error("Cannot send text to REPL since '%s' is no longer running", r.name)
+        return
+    endif
+
     try
         call r.send_string(str)
     catch /^reply\.vim: /
@@ -152,4 +157,34 @@ function! reply#command#list() abort
             echon printf(' (%s)', filetype)
         endfor
     endfor
+endfunction
+
+function! reply#command#recv() abort
+    if s:not_supported()
+        return
+    endif
+
+    let bufnr = bufnr('%')
+    try
+        let repl = reply#lifecycle#repl_for_buf(bufnr)
+    catch /^reply\.vim: /
+        return
+    endtry
+    if repl is v:null
+        call reply#error('No REPL related to buffer #%d was found', bufnr)
+        return
+    endif
+
+    try
+        let exprs = repl.extract_user_input()
+    catch /^reply\.vim: /
+        return
+    endtry
+
+    " Expression may contain newlines. Separate them into lines.
+    let output = []
+    for expr in exprs
+        let output += split(expr, "\n")
+    endfor
+    call append('.', output)
 endfunction

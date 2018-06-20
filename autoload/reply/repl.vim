@@ -63,7 +63,7 @@ function! s:base.start(context) abort
     let self.running = v:true
 endfunction
 
-function! s:base.into_terminal_window() abort
+function! s:base.into_terminal_job_mode() abort
     if bufnr('%') ==# self.term_bufnr
         if mode() ==# 't'
             return
@@ -105,7 +105,7 @@ function! s:base.send_string(str) abort
     " Note: Need to enter Terminal-Job mode for updating the terminal window
 
     let prev_winnr = winnr()
-    call self.into_terminal_window()
+    call self.into_terminal_job_mode()
 
     call term_sendkeys(self.term_bufnr, str)
     call reply#log('String was sent to', self.name, ':', str)
@@ -113,6 +113,30 @@ function! s:base.send_string(str) abort
     if winnr() != prev_winnr
         execute prev_winnr . 'wincmd w'
     endif
+endfunction
+
+function! s:base.extract_user_input() abort
+    if !has_key(self, 'extract_exprs_from_terminal')
+        throw reply#error("REPL '%s' does not support :ReplRecv", self.name)
+    endif
+
+    if !bufexists(self.term_bufnr)
+        throw reply#error("Terminal buffer #d for REPL '%s' is no longer existing", self.term_bufnr, self.name)
+    endif
+
+    let lines = getbufline(self.term_bufnr, 1, '$')
+    if lines == [] || lines == ['']
+        throw reply#error("Terminal buffer #d for REPL '%s' is empty", self.term_bufnr, self.name)
+    endif
+
+    try
+        let exprs = self.extract_exprs_from_terminal(lines)
+    catch /^reply.vim: /
+        return
+    endtry
+    call reply#log('Extracted lines from terminal #', self.term_bufnr, exprs)
+
+    return exprs
 endfunction
 
 function! s:base.stop() abort
