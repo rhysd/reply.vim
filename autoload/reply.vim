@@ -32,15 +32,3 @@ function! reply#echo(fmt, ...) abort
     endif
     echo 'reply.vim: ' . msg
 endfunction
-
-function! reply#find_npm_executable(bin) abort
-    let node_modules = finddir('node_modules', ';')
-    if node_modules ==# ''
-        return ''
-    endif
-    let executable = printf('%s%s.bin%s%s', fnamemodify(node_modules, ':p'), s:path_sep, s:path_sep, a:bin)
-    if !filereadable(executable)
-        return ''
-    endif
-    return executable
-endfunction

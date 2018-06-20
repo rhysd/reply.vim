@@ -10,7 +10,7 @@ function! s:repl.executable() abort
     if config isnot v:null
         return config
     endif
-    let local = reply#find_npm_executable('electron')
+    let local = reply#node#find_npm_executable('electron')
     if local !=# ''
         return local
     endif
@@ -19,6 +19,10 @@ endfunction
 
 function! s:repl.get_command() abort
     return [self.executable(), '--interactive'] + self.get_var('command_options', [])
+endfunction
+
+function! s:repl.extract_exprs_from_terminal(lines) abort
+    return reply#node#extract_exprs_from_lines(a:lines)
 endfunction
 
 function! reply#repl#electron#new() abort
