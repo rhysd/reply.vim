@@ -1,4 +1,7 @@
-let s:repl = reply#repl#base('julia')
+let s:repl = reply#repl#base('julia', {
+        \   'prompt_start' :    '^julia> ',
+        \   'prompt_continue' : '^       \ze\S',
+        \ })
 
 function! s:repl.executable() abort
     let exe = self.get_var('executable', 'julia')

@@ -1,4 +1,8 @@
-let s:repl = reply#repl#base('cling_objc')
+let s:repl = reply#repl#base('cling_objc', {
+    \   'prompt_start' : '^\[cling]\$ \%(?   \)\@!',
+    \   'prompt_continue' : '^\[cling]\$ ?   ',
+    \   'ignore_input_pattern' : '^\.',
+    \ })
 
 function! s:repl.executable() abort
     return self.get_var('executable', 'cling')

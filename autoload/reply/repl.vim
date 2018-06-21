@@ -127,20 +127,21 @@ function! s:base.extract_input_from_terminal_buf(lines) abort
 
         let s = matchstr(line, self.prompt_start)
         if s !=# ''
-            let e = substitute(line[len(s) :], '\s\+$', '', '')
-            if e !=# ''
-                let exprs += [e]
+            let line = substitute(line[len(s) :], '\s\+$', '', '')
+            if has_key(self, 'ignore_input_pattern') && line =~# self.ignore_input_pattern
+                continue
+            endif
+            if line !=# ''
+                let exprs += [line]
             endif
             let continuing = v:true
             continue
         endif
 
-        if self.prompt_continue isnot v:null
-            let s = matchstr(line, self.prompt_continue)
-            if s !=# ''
-                let exprs += [substitute(line[len(s) :], '\s\+$', '', '')]
-                continue
-            endif
+        let s = matchstr(line, self.prompt_continue isnot v:null ? self.prompt_continue : self.prompt_start)
+        if s !=# ''
+            let exprs += [substitute(line[len(s) :], '\s\+$', '', '')]
+            continue
         endif
 
         let continuing = v:false
@@ -195,6 +196,9 @@ function! reply#repl#base(name, ...) abort
     endif
     if has_key(config, 'prompt_continue')
         let r.prompt_continue = config.prompt_continue
+    endif
+    if has_key(config, 'ignore_input_pattern')
+        let r.ignore_input_pattern = config.ignore_input_pattern
     endif
     let r.path_name = substitute(a:name, '-', '_', 'g')
     return r
