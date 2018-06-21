@@ -1,6 +1,8 @@
 let g:repo_root = fnamemodify(expand('<sfile>'), ':h:h')
 
 call themis#option('exclude', 'test/Guardfile')
+call themis#option('exclude', 'test/README.md')
+call themis#option('exclude', 'test/.gitattributes')
 
 function! WithTimeout(timeout, pred) abort
     let total = 0
