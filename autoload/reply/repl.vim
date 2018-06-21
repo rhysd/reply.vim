@@ -116,7 +116,7 @@ function! s:base.send_string(str) abort
 endfunction
 
 function! s:base.extract_input_from_terminal_buf(lines) abort
-    if !has_key(self, 'prompt_start') || !has_key(self, 'prompt_continue')
+    if !has_key(self, 'prompt_start') || self.prompt_start is v:null || !has_key(self, 'prompt_continue')
         throw reply#error("REPL '%s' does not support :ReplRecv", self.name)
     endif
 
@@ -127,7 +127,7 @@ function! s:base.extract_input_from_terminal_buf(lines) abort
 
         let s = matchstr(line, self.prompt_start)
         if s !=# ''
-            let e = line[len(s) :]
+            let e = substitute(line[len(s) :], '\s\+$', '', '')
             if e !=# ''
                 let exprs += [e]
             endif
@@ -135,10 +135,12 @@ function! s:base.extract_input_from_terminal_buf(lines) abort
             continue
         endif
 
-        let s = matchstr(line, self.prompt_continue)
-        if s !=# ''
-            let exprs += [line[len(s) :]]
-            continue
+        if self.prompt_continue isnot v:null
+            let s = matchstr(line, self.prompt_continue)
+            if s !=# ''
+                let exprs += [substitute(line[len(s) :], '\s\+$', '', '')]
+                continue
+            endif
         endif
 
         let continuing = v:false

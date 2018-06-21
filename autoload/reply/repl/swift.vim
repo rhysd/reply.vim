@@ -1,9 +1,6 @@
-let s:repl = reply#repl#base('swift')
-
-function! s:repl.get_command() abort
-    return [self.executable(), '-repl'] + self.get_var('command_options', [])
-endfunction
-
 function! reply#repl#swift#new() abort
-    return deepcopy(s:repl)
+    return reply#repl#base('swift', {
+        \   'prompt_start' : '^\s\+\d\+> ',
+        \   'prompt_continue' : '^\s\+\d\+\. ',
+        \ })
 endfunction
