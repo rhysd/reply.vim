@@ -115,6 +115,38 @@ function! s:base.send_string(str) abort
     endif
 endfunction
 
+function! s:base.extract_exprs_from_terminal(lines) abort
+    if !has_key(self, 'prompt_start') || !has_key(self, 'prompt_continue')
+        throw reply#error("REPL '%s' does not support :ReplRecv", self.name)
+    endif
+
+    let exprs = []
+    let continuing = v:false
+    for idx in range(len(a:lines))
+        let line = a:lines[idx]
+
+        let s = matchstr(line, self.prompt_start)
+        if s !=# ''
+            let e = line[len(s) :]
+            if e !=# ''
+                let exprs += [e]
+            endif
+            let continuing = v:true
+            continue
+        endif
+
+        let s = matchstr(line, self.prompt_continue)
+        if s !=# ''
+            let exprs += [line[len(s) :]]
+            continue
+        endif
+
+        let continuing = v:false
+    endfor
+
+    return exprs
+endfunction
+
 function! s:base.extract_user_input() abort
     if !has_key(self, 'extract_exprs_from_terminal')
         throw reply#error("REPL '%s' does not support :ReplRecv", self.name)
@@ -160,14 +192,16 @@ endfunction
 " config {
 "   name: string;
 " }
-function! reply#repl#base(config) abort
-    if type(a:config) == v:t_string
-        let name = a:config
-    else
-        let name = a:config.name
-    endif
+function! reply#repl#base(name, ...) abort
+    let config = get(a:, 1, {})
     let r = deepcopy(s:base)
-    let r.name = name
-    let r.path_name = substitute(name, '-', '_', 'g')
+    let r.name = a:name
+    if has_key(config, 'prompt_start')
+        let r.prompt_start = config.prompt_start
+    endif
+    if has_key(config, 'prompt_continue')
+        let r.prompt_continue = config.prompt_continue
+    endif
+    let r.path_name = substitute(a:name, '-', '_', 'g')
     return r
 endfunction
