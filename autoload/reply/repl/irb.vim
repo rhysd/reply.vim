@@ -1,6 +1,6 @@
 let s:repl = reply#repl#base('irb')
 
-function! s:repl.extract_exprs_from_terminal(lines) abort
+function! s:repl.extract_input_from_terminal_buf(lines) abort
     let exprs = []
     for line in a:lines
         let m = matchlist(line, '^irb([^)]\+):\d\+:\(\d\+\)[*>] \(.*\)$')

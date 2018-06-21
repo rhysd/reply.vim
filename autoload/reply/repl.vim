@@ -115,7 +115,7 @@ function! s:base.send_string(str) abort
     endif
 endfunction
 
-function! s:base.extract_exprs_from_terminal(lines) abort
+function! s:base.extract_input_from_terminal_buf(lines) abort
     if !has_key(self, 'prompt_start') || !has_key(self, 'prompt_continue')
         throw reply#error("REPL '%s' does not support :ReplRecv", self.name)
     endif
@@ -148,10 +148,6 @@ function! s:base.extract_exprs_from_terminal(lines) abort
 endfunction
 
 function! s:base.extract_user_input() abort
-    if !has_key(self, 'extract_exprs_from_terminal')
-        throw reply#error("REPL '%s' does not support :ReplRecv", self.name)
-    endif
-
     if !bufexists(self.term_bufnr)
         throw reply#error("Terminal buffer #d for REPL '%s' is no longer existing", self.term_bufnr, self.name)
     endif
@@ -161,11 +157,7 @@ function! s:base.extract_user_input() abort
         throw reply#error("Terminal buffer #d for REPL '%s' is empty", self.term_bufnr, self.name)
     endif
 
-    try
-        let exprs = self.extract_exprs_from_terminal(lines)
-    catch /^reply.vim: /
-        return
-    endtry
+    let exprs = self.extract_input_from_terminal_buf(lines)
     call reply#log('Extracted lines from terminal #', self.term_bufnr, exprs)
 
     return exprs
