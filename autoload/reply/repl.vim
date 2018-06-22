@@ -30,17 +30,18 @@ function! s:base._on_exit(channel, exitval) abort
         call self.hooks.on_close(self, a:exitval)
     endif
 
-    if a:exitval == 0
-    elseif a:exitval == -1
+    if a:exitval == -1
         " https://github.com/vim/vim/blob/f9c3883b11b33f0c548df5e949ba59fde74d3e7b/src/os_unix.c#L5759
-        call reply#log(self.name, "terminated by signal")
-    else
+        call reply#log(self.name, 'terminated by signal')
+    elseif a:exitval != 0
         call reply#error("REPL '%s' exited with status %d", self.name, a:exitval)
     endif
 
     if self.running
         call self.stop()
     endif
+
+    unlet self.term_bufnr
 endfunction
 
 " context {

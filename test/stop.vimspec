@@ -10,10 +10,23 @@ Describe :ReplStop
         endfor
     End
 
-    It closes terminal window and remove terminal buffer
+    It closes a terminal window and remove terminal buffer
         Repl node
         let b = bufnr('%')
         Assert Equals(term_list()[0], b)
+        ReplStop
+        Assert Empty(term_list())
+        Assert Equals(bufwinnr(b), -1)
+        Assert True(WithTimeout(1, {-> empty(reply#lifecycle#running_repls())}))
+    End
+
+    It closes a terminal window even in it
+        Repl node
+        let b = bufnr('%')
+        Assert Equals(term_list()[0], b)
+        let w = bufwinnr(b)
+        Assert NotEquals(w, -1)
+        execute w . 'wincmd w'
         ReplStop
         Assert Empty(term_list())
         Assert Equals(bufwinnr(b), -1)
