@@ -97,14 +97,23 @@ function! reply#command#stop(bang) abort
     let repls = reply#lifecycle#running_repls()
     if a:bang
         for r in copy(repls)
-            call r.stop()
+            if r.running
+                call r.stop()
+            endif
         endfor
     else
         if empty(repls)
             call reply#echo('No REPL is running')
             return
         endif
-        call repls[-1].stop()
+
+        let r = repls[-1]
+        if !r.running
+            call reply#echo("REPL '%s' is not running", r.name)
+            return
+        endif
+
+        call r.stop()
     endif
 endfunction
 

@@ -47,6 +47,7 @@ function! s:did_repl_end(repl, exitstatus) abort
         if s:repls[i].term_bufnr == a:repl.term_bufnr
             call remove(s:repls, i)
             call reply#log(a:repl.name, 'closed with exit status', a:exitstatus, '. current state:', s:repls)
+            unlet a:repl.term_bufnr
             return
         endif
     endfor
