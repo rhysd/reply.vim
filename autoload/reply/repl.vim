@@ -1,25 +1,29 @@
 let s:base = {}
 
-function! s:base.get_var(name, default) abort
+function! s:base_get_var(name, default) dict abort
     let v = 'reply_repl_' . self.path_name . '_' . a:name
     return get(b:, v, get(g:, v, a:default))
 endfunction
+let s:base.get_var = function('s:base_get_var')
 
-function! s:base.executable() abort
+function! s:base_executable() dict abort
     return self.get_var('executable', self.name)
 endfunction
+let s:base.executable = function('s:base_executable')
 
-function! s:base.is_available() abort
+function! s:base_is_available() dict abort
     return executable(self.executable())
 endfunction
+let s:base.is_available = function('s:base_is_available')
 
-function! s:base.get_command() abort
+function! s:base_get_command() dict abort
     return [self.executable()] +
          \ self.get_var('command_options', []) +
          \ get(self.context, 'cmdopts', [])
 endfunction
+let s:base.get_command = function('s:base_get_command')
 
-function! s:base._on_exit(channel, exitval) abort
+function! s:base__on_exit(channel, exitval) dict abort
     call reply#log('exit_cb callback with status', a:exitval, 'for', self.name)
 
     if has_key(self.context, 'on_close')
@@ -43,13 +47,14 @@ function! s:base._on_exit(channel, exitval) abort
 
     unlet self.term_bufnr
 endfunction
+let s:base._on_exit = function('s:base__on_exit')
 
 " context {
 "   source?: string;
 "   bufname?: string;
 "   cmdopts?: string[];
 " }
-function! s:base.start(context) abort
+function! s:base_start(context) dict abort
     let self.context = a:context
     let self.running = v:false
     let cmd = self.get_command()
@@ -66,8 +71,9 @@ function! s:base.start(context) abort
     let self.term_bufnr = bufnr
     let self.running = v:true
 endfunction
+let s:base.start = function('s:base_start')
 
-function! s:base.into_terminal_job_mode() abort
+function! s:base_into_terminal_job_mode() dict abort
     if bufnr('%') ==# self.term_bufnr
         if mode() ==# 't'
             return
@@ -91,9 +97,10 @@ function! s:base.into_terminal_job_mode() abort
         normal! i
     endif
 endfunction
+let s:base.into_terminal_job_mode = function('s:base_into_terminal_job_mode')
 
 " Note: Precondition: Terminal window must exists
-function! s:base.send_string(str) abort
+function! s:base_send_string(str) dict abort
     if !self.running
         throw reply#error("REPL '%s' is no longer running", self.name)
     endif
@@ -118,8 +125,9 @@ function! s:base.send_string(str) abort
         execute prev_winnr . 'wincmd w'
     endif
 endfunction
+let s:base.send_string = function('s:base_send_string')
 
-function! s:base.extract_input_from_terminal_buf(lines) abort
+function! s:base_extract_input_from_terminal_buf(lines) dict abort
     if !has_key(self, 'prompt_start') || self.prompt_start is v:null || !has_key(self, 'prompt_continue')
         throw reply#error("REPL '%s' does not support :ReplRecv", self.name)
     endif
@@ -153,8 +161,9 @@ function! s:base.extract_input_from_terminal_buf(lines) abort
 
     return exprs
 endfunction
+let s:base.extract_input_from_terminal_buf = function('s:base_extract_input_from_terminal_buf')
 
-function! s:base.extract_user_input() abort
+function! s:base_extract_user_input() dict abort
     if !bufexists(self.term_bufnr)
         throw reply#error("Terminal buffer #d for REPL '%s' is no longer existing", self.term_bufnr, self.name)
     endif
@@ -169,8 +178,9 @@ function! s:base.extract_user_input() abort
 
     return exprs
 endfunction
+let s:base.extract_user_input = function('s:base_extract_user_input')
 
-function! s:base.stop() abort
+function! s:base_stop() dict abort
     if !self.running
         return
     endif
@@ -189,6 +199,7 @@ function! s:base.stop() abort
         call reply#log('Terminal buffer to close is not found for ', self.name, 'at', self.term_bufnr)
     endif
 endfunction
+let s:base.stop = function('s:base_stop')
 
 " config {
 "   name: string;
