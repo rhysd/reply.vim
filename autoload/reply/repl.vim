@@ -31,7 +31,9 @@ function! s:base__on_exit(channel, exitval) dict abort
     endif
 
     if has_key(self, 'hooks') && has_key(self.hooks, 'on_close')
-        call self.hooks.on_close(self, a:exitval)
+        for F in self.hooks.on_close
+            call F(self, a:exitval)
+        endfor
     endif
 
     if a:exitval == -1
@@ -200,6 +202,19 @@ function! s:base_stop() dict abort
     endif
 endfunction
 let s:base.stop = function('s:base_stop')
+
+function! s:base_add_hook(hook, funcref) dict abort
+    if !has_key(self, 'hooks')
+        let self.hooks = {}
+    endif
+    if !has_key(self.hooks, a:hook)
+        let self.hooks[a:hook] = [a:funcref]
+    else
+        let self.hooks[a:hook] += [a:funcref]
+    endif
+    call reply#log('Hook', a:hook, 'added:', self.hooks[a:hook])
+endfunction
+let s:base.add_hook = function('s:base_add_hook')
 
 " config {
 "   name: string;

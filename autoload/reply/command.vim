@@ -39,39 +39,40 @@ function! s:not_supported() abort
     return 1
 endfunction
 
+function! s:open_repl(name, cmdopts, always_new, with_text) abort
+    if a:with_text
+        let text = s:get_range_text(getpos("'<"), getpos("'>"))
+    endif
+
+    let bufnr = bufnr('%')
+    if a:always_new || a:cmdopts != []
+        let repl = reply#lifecycle#new(bufnr, a:name, a:cmdopts)
+    else
+        let repl = reply#lifecycle#repl_for_buf(bufnr)
+        if repl isnot v:null
+            call repl.into_terminal_job_mode()
+        else
+            let repl = reply#lifecycle#new(bufnr, a:name, a:cmdopts)
+        endif
+    endif
+
+    if a:with_text
+        call repl.send_string(text)
+    endif
+
+    return repl
+endfunction
+
 function! reply#command#start(args, bang, has_range, start, last) abort
     if s:not_supported()
         return
     endif
 
     let name = get(a:args, 0, '')
-
-    if len(a:args) >= 2
-        let cmdopts = a:args[1 :]
-    else
-        let cmdopts = []
-    endif
-
-    if a:has_range
-        let text = s:get_range_text(getpos("'<"), getpos("'>"))
-    endif
-
+    let cmdopts = len(a:args) >= 2 ? a:args[1 :] : []
     let bufnr = bufnr('%')
     try
-        if a:bang || cmdopts != []
-            let repl = reply#lifecycle#new(bufnr, name, cmdopts)
-        else
-            let repl = reply#lifecycle#repl_for_buf(bufnr)
-            if repl isnot v:null
-                call repl.into_terminal_job_mode()
-            else
-                let repl = reply#lifecycle#new(bufnr, name, cmdopts)
-            endif
-        endif
-
-        if a:has_range
-            call repl.send_string(text)
-        endif
+        call s:open_repl(name, cmdopts, a:bang, a:has_range)
     catch /^reply\.vim: /
     endtry
 
@@ -196,4 +197,76 @@ function! reply#command#recv() abort
         let output += split(expr, "\n")
     endfor
     call append('.', output)
+endfunction
+
+function! s:send_text_auto() abort
+    if !exists('b:reply_auto_repl')
+        call reply#log('b:reply_auto_repl is not found. Giving up :ReplAuto')
+        return
+    endif
+    if !b:reply_auto_repl.running
+        call reply#log('REPL', b:reply_auto_repl.name, ' is not running. Giving up :ReplAuto')
+        return
+    endif
+
+    let newline = line('.')
+    let lines = getline(b:reply_auto_prev_line, newline - 1)
+
+    let text = join(lines, "\n")
+    if text !~# '^\n*$'
+        call reply#log('Automatically send text', string(text))
+        call b:reply_auto_repl.send_string(text)
+    endif
+
+    let b:reply_auto_prev_line = newline
+endfunction
+
+function! s:cleanup_auto_setup(repl, exitval) abort
+    if !has_key(a:repl.context, 'source_bufnr')
+        call reply#log('REPL', a:repl.name, 'does not have source_bufnr. Giving up cleanup :ReplAuto setup')
+        return
+    endif
+
+    let bufnr = a:repl.context.source_bufnr
+    if !bufexists(bufnr)
+        call reply#log('REPL', a:repl.name, 'buffer', bufnr, 'does not eixst. Giving up cleanup :ReplAuto setup')
+        return
+    endif
+
+    let b = getbufvar(bufnr, '')
+    unlet! b.reply_auto_prev_line
+    unlet! b.reply_auto_repl
+
+    execute 'autocmd! plugin-reply-auto CursorMovedI <buffer=' . bufnr . '>'
+
+    call reply#log('Cleanup :ReplAuto setup for buffer', bufnr)
+endfunction
+
+function! reply#command#auto(args, bang, has_range, range_begin, range_end) abort
+    if s:not_supported()
+        return
+    endif
+
+    let name = get(a:args, 0, '')
+    let cmdopts = len(a:args) > 2 ? a:args[1 :] : []
+    let bufnr = bufnr('%')
+    try
+        let repl = s:open_repl(name, cmdopts, a:bang, a:has_range)
+    catch /^reply\.vim: /
+        return
+    endtry
+
+    if bufnr != bufnr('%')
+        execute winbufnr(bufnr) . 'wincmd w'
+    endif
+
+    augroup plugin-reply-auto
+        autocmd!
+        autocmd CursorMovedI <buffer> if b:reply_auto_prev_line < line('.') | call <SID>send_text_auto() | endif
+    augroup END
+
+    call repl.add_hook('on_close', function('s:cleanup_auto_setup'))
+    let b:reply_auto_repl = repl
+    let b:reply_auto_prev_line = line('$')
+    call reply#log('Automatic REPL', repl.name, 'setup for buffer', bufnr)
 endfunction
