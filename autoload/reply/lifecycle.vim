@@ -31,6 +31,7 @@ let s:default_repls = {
 \   'erlang': ['erl'],
 \   'elixir': ['iex'],
 \   'r': ['R'],
+\   'elm': ['elm_repl'],
 \ }
 " TODO: Add Devel::REPL support for Perl
 
