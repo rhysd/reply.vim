@@ -39,6 +39,17 @@ Describe :Repl
         Assert Equals(getline(1, '$'), ['> 1 + 1', '2', '> '])
     End
 
+    It accepts command line options as rest of arguments
+        Repl node -r path
+        Assert Equals(mode(), 't')
+        Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
+        Assert Equals(getline('.'), '> ')
+        Assert Equals(bufname('%'), 'reply: node')
+        call term_sendkeys(bufnr('%'), "path.join('foo', 'bar')\<CR>")
+        Assert True(WithTimeout(1, {-> line('$') !=# 1}))
+        Assert Match(getline(line('$')-1), "^'foo[\\/]bar'$")
+    End
+
     It sends selected strings in visual mode
         call setline('.', ['1 + 1'])
         let b = bufnr('%')
