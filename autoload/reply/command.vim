@@ -214,7 +214,7 @@ function! s:send_text_auto() abort
 
     let text = join(lines, "\n")
     if text !~# '^\n*$'
-        call reply#log('Automatically send text', string(text))
+        call reply#log('Automatically send text to buffer', b:reply_auto_repl.term_bufnr, string(text))
         call b:reply_auto_repl.send_string(text)
     endif
 

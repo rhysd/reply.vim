@@ -81,7 +81,7 @@ function! s:base_into_terminal_job_mode() dict abort
             return
         endif
         " Start Terminal-Job mode if job is alive
-        if &modifiable
+        if self.running
             normal! i
         endif
         return
@@ -94,7 +94,7 @@ function! s:base_into_terminal_job_mode() dict abort
         execute 'vertical sbuffer' self.term_bufnr
     endif
 
-    if mode() ==# 'n' && &modifiable
+    if mode() ==# 'n' && self.running
         " Start Terminal-Job mode if job is alive
         normal! i
     endif
