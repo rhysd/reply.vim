@@ -18,8 +18,7 @@ let s:base.is_available = function('s:base_is_available')
 
 function! s:base_get_command() dict abort
     return [self.executable()] +
-         \ self.get_var('command_options', []) +
-         \ get(self.context, 'cmdopts', [])
+         \ self.get_var('command_options', [])
 endfunction
 let s:base.get_command = function('s:base_get_command')
 
@@ -59,7 +58,11 @@ let s:base._on_exit = function('s:base__on_exit')
 function! s:base_start(context) dict abort
     let self.context = a:context
     let self.running = v:false
-    let cmd = self.get_command()
+    if has_key(self.context, 'cmdopts') && has_key(self.context, 'source')
+        let src = self.context.source
+        call map(self.context.cmdopts, {_, o -> o ==# '%' ? src : o})
+    endif
+    let cmd = self.get_command() + get(self.context, 'cmdopts', [])
     if type(cmd) != v:t_list
         let cmd = [cmd]
     endif

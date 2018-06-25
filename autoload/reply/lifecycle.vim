@@ -87,7 +87,9 @@ endfunction
 
 function! reply#lifecycle#new(bufnr, name, cmdopts) abort
     let source = bufname(a:bufnr)
-    if !filereadable(source)
+    if filereadable(source)
+        let source = fnamemodify(source, ':p')
+    else
         let source = ''
     endif
 

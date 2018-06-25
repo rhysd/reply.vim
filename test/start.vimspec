@@ -50,6 +50,20 @@ Describe :Repl
         Assert Match(getline(line('$')-1), "^'foo[\\/]bar'$")
     End
 
+    It expands '%' in command line options as its full file path
+        let file = AssetPath('repl-cmdopts-test.js')
+        execute 'edit!' file
+        Repl node -r %
+        Assert Equals(mode(), 't')
+        Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
+        Assert Equals(getline('.'), '> ')
+        Assert Equals(bufname('%'), 'reply: node')
+        call term_sendkeys(bufnr('%'), "global.foo()\<CR>")
+        Assert True(WithTimeout(1, {-> line('$') !=# 1}))
+        Assert Equals(getline(1, '$'), ['> global.foo()', "'foo'", '> '])
+    End
+
+
     It sends selected strings in visual mode
         call setline('.', ['1 + 1'])
         let b = bufnr('%')
