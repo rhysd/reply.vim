@@ -192,12 +192,14 @@ function! s:base_stop() dict abort
 
     let self.running = v:false
 
-    " Maybe needed: call term_setkill(a:repl.term_bufnr, 'term')
+    " Note: May be needed: call term_setkill(self.term_bufnr, 'term')
+    " At least on macOS, it seems that term_setkill(self.term_bufnr, 'term')
+    " does not stop the terminal process actually.
     if bufexists(self.term_bufnr)
         try
-            execute 'bdelete!' self.term_bufnr
-        catch /^Vim\%((\a\+)\)\=:E516/
-            " When the buffer is already deleted, skip deleting it
+            execute 'bwipeout!' self.term_bufnr
+        catch /^Vim\%((\a\+)\)\=:E517/
+            " When the buffer is already wiped out, skip it
         endtry
         call reply#log('Stopped terminal', self.name, 'at', self.term_bufnr)
     else

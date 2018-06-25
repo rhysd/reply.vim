@@ -49,10 +49,10 @@ function! s:open_repl(name, cmdopts, always_new, with_text) abort
         let repl = reply#lifecycle#new(bufnr, a:name, a:cmdopts)
     else
         let repl = reply#lifecycle#repl_for_buf(bufnr)
-        if repl isnot v:null
-            call repl.into_terminal_job_mode()
-        else
+        if repl is v:null || repl.running
             let repl = reply#lifecycle#new(bufnr, a:name, a:cmdopts)
+        else
+            call repl.into_terminal_job_mode()
         endif
     endif
 
@@ -259,7 +259,10 @@ function! reply#command#auto(args, bang, has_range, range_begin, range_end) abor
     endtry
 
     if bufnr != bufnr('%')
-        execute winbufnr(bufnr) . 'wincmd w'
+        let w = winbufnr(bufnr)
+        if winnr() != w
+            execute w . 'wincmd w'
+        endif
     endif
 
     augroup plugin-reply-auto

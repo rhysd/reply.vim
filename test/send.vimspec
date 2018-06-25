@@ -8,9 +8,9 @@ Describe ReplSend
     End
 
     After each
-        bdelete!
+        bwipeout!
         for b in term_list()
-            execute 'bdelete!' b
+            execute 'bwipeout!' b
         endfor
     End
 
