@@ -58,21 +58,36 @@ let s:base._on_exit = function('s:base__on_exit')
 function! s:base_start(context) dict abort
     let self.context = a:context
     let self.running = v:false
+
     if has_key(self.context, 'cmdopts') && has_key(self.context, 'source') && self.context.source !=# ''
         let src = self.context.source
         call map(self.context.cmdopts, {_, o -> o ==# '%' ? src : o})
     endif
+
     let cmd = self.get_command() + get(self.context, 'cmdopts', [])
     if type(cmd) != v:t_list
         let cmd = [cmd]
     endif
-    let bufnr = term_start(cmd, {
+
+    let options = {
         \   'term_name' : 'reply: ' . self.name,
-        \   'vertical' : 1,
         \   'term_finish' : 'open',
-        \   'exit_cb' : self._on_exit,
-        \ })
-    call reply#log('Start terminal at', bufnr, 'with command', cmd)
+        \ }
+    if has_key(a:context, 'mods') && a:context.mods !=# ''
+        let options.term_opencmd = a:context.mods . ' sbuffer %d'
+    else
+        " If no <mods> command is specified, splitting vertically is default
+        let options.vertical = 1
+    endif
+
+    call reply#log('Will start terminal with command', cmd, 'and with options', options)
+
+    " Set callbacks after logging to avoid mess up it
+    let options.exit_cb = self._on_exit
+
+    let bufnr = term_start(cmd, options)
+    call reply#log('Started terminal at', bufnr)
+
     let self.term_bufnr = bufnr
     let self.running = v:true
 endfunction
@@ -94,7 +109,9 @@ function! s:base_into_terminal_job_mode() dict abort
     if winnr != -1
         execute winnr . 'wincmd w'
     else
-        execute 'vertical sbuffer' self.term_bufnr
+        let mods = has_key(self.context, 'mods') && self.context.mods !=# '' ?
+                    \ self.context.mods : 'vertical'
+        execute mods 'sbuffer' self.term_bufnr
     endif
 
     if mode() ==# 'n' && self.running

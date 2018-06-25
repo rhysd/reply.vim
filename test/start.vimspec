@@ -63,6 +63,14 @@ Describe :Repl
         Assert Equals(getline(1, '$'), ['> global.foo()', "'foo'", '> '])
     End
 
+    It accepts <mods> as prefix of the command
+        let prev = bufnr('%')
+        botright Repl node
+        " Check window is split horizontally (the default behavior is vertical split)
+        Assert NotEquals(prev, bufnr('%'))
+        wincmd j
+        Assert Equals(prev, bufnr('%'))
+    End
 
     It sends selected strings in visual mode
         call setline('.', ['1 + 1'])

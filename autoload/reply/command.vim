@@ -39,18 +39,20 @@ function! s:not_supported() abort
     return 1
 endfunction
 
-function! s:open_repl(name, cmdopts, always_new, with_text) abort
+function! s:open_repl(name, cmdopts, always_new, with_text, mods) abort
+    call reply#log('Will open REPL terminal for', a:name, 'Configuraiton:', a:cmdopts, a:always_new, a:with_text, a:mods)
+
     if a:with_text
         let text = s:get_range_text(getpos("'<"), getpos("'>"))
     endif
 
     let bufnr = bufnr('%')
     if a:always_new || a:cmdopts != []
-        let repl = reply#lifecycle#new(bufnr, a:name, a:cmdopts)
+        let repl = reply#lifecycle#new(bufnr, a:name, a:cmdopts, a:mods)
     else
         let repl = reply#lifecycle#repl_for_buf(bufnr)
         if repl is v:null || repl.running
-            let repl = reply#lifecycle#new(bufnr, a:name, a:cmdopts)
+            let repl = reply#lifecycle#new(bufnr, a:name, a:cmdopts, a:mods)
         else
             call repl.into_terminal_job_mode()
         endif
@@ -63,7 +65,7 @@ function! s:open_repl(name, cmdopts, always_new, with_text) abort
     return repl
 endfunction
 
-function! reply#command#start(args, bang, has_range, start, last) abort
+function! reply#command#start(args, bang, mods, has_range, start, last) abort
     if s:not_supported()
         return
     endif
@@ -72,7 +74,7 @@ function! reply#command#start(args, bang, has_range, start, last) abort
     let cmdopts = len(a:args) >= 2 ? a:args[1 :] : []
     let bufnr = bufnr('%')
     try
-        call s:open_repl(name, cmdopts, a:bang, a:has_range)
+        call s:open_repl(name, cmdopts, a:bang, a:has_range, a:mods)
     catch /^reply\.vim: /
     endtry
 
@@ -244,7 +246,7 @@ function! s:cleanup_auto_setup(repl, exitval) abort
     call reply#log('Cleanup :ReplAuto setup for buffer', bufnr)
 endfunction
 
-function! reply#command#auto(args, bang, has_range, range_begin, range_end) abort
+function! reply#command#auto(args, bang, mods, has_range, range_begin, range_end) abort
     if s:not_supported()
         return
     endif
@@ -253,7 +255,7 @@ function! reply#command#auto(args, bang, has_range, range_begin, range_end) abor
     let cmdopts = len(a:args) > 2 ? a:args[1 :] : []
     let bufnr = bufnr('%')
     try
-        let repl = s:open_repl(name, cmdopts, a:bang, a:has_range)
+        let repl = s:open_repl(name, cmdopts, a:bang, a:has_range, a:mods)
     catch /^reply\.vim: /
         return
     endtry
