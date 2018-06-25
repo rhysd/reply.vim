@@ -1,0 +1,52 @@
+Describe :ReplRecv
+    Before each
+        new!
+    End
+
+    After each
+        bwipeout!
+        for b in term_list()
+            execute 'bwipeout!' b
+        endfor
+    End
+
+    It extracts user input from terminal window
+        let b = bufnr('%')
+        Repl node
+        Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
+        call term_sendkeys(bufnr('%'), "1 + 1\<CR>\<CR>1 +\<CR>1\<CR>")
+        Assert True(WithTimeout(1, {-> line('$') !=# 1}))
+
+        execute bufwinnr(b) . 'wincmd w'
+        ReplRecv
+
+        let expected = [
+            \   '',
+            \   '1 + 1',
+            \   '1 +',
+            \   '1',
+            \ ]
+        Assert Equals(getline(1, '$'), expected)
+    End
+
+    It formats appended lines using `==`
+        setlocal et tabstop=4 shiftwidth=4 softtabstop=4
+        set ft=javascript
+        let b = bufnr('%')
+        Repl node
+        Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
+        call term_sendkeys(bufnr('%'), "function foo() {\<CR>return 'foo';\<CR>}\<CR>")
+        Assert True(WithTimeout(1, {-> line('$') !=# 1}))
+
+        execute bufwinnr(b) . 'wincmd w'
+        ReplRecv
+
+        let expected = [
+            \   '',
+            \   'function foo() {',
+            \   "    return 'foo';",
+            \   '}',
+            \ ]
+        Assert Equals(getline(1, '$'), expected)
+    End
+End

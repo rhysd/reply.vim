@@ -197,6 +197,8 @@ function! reply#command#recv() abort
         let output += split(expr, "\n")
     endfor
     call append('.', output)
+    call reply#log('Appended after current line', line('.'), output)
+    execute 'silent' 'normal!' (len(output)+1) . '=='
 endfunction
 
 function! s:send_text_auto() abort
@@ -214,7 +216,7 @@ function! s:send_text_auto() abort
 
     let text = join(lines, "\n")
     if text !~# '^\n*$'
-        call reply#log('Automatically send text to buffer', b:reply_auto_repl.term_bufnr, string(text))
+        call reply#log('Automatically send text to buffer', string(text))
         call b:reply_auto_repl.send_string(text)
     endif
 

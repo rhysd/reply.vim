@@ -58,7 +58,7 @@ let s:base._on_exit = function('s:base__on_exit')
 function! s:base_start(context) dict abort
     let self.context = a:context
     let self.running = v:false
-    if has_key(self.context, 'cmdopts') && has_key(self.context, 'source')
+    if has_key(self.context, 'cmdopts') && has_key(self.context, 'source') && self.context.source !=# ''
         let src = self.context.source
         call map(self.context.cmdopts, {_, o -> o ==# '%' ? src : o})
     endif
