@@ -1,4 +1,4 @@
-Describe ReplSend
+Describe :ReplSend
     Before each
         new!
         Repl node

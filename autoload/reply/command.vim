@@ -39,6 +39,7 @@ function! s:not_supported() abort
     return 1
 endfunction
 
+" {{{ Start
 function! s:open_repl(name, cmdopts, always_new, with_text, mods) abort
     call reply#log('Will open REPL terminal for', a:name, 'Configuraiton:', a:cmdopts, a:always_new, a:with_text, a:mods)
 
@@ -91,7 +92,9 @@ function! reply#command#completion_start(arglead, cmdline, cursorpos) abort
 
     return filter(copy(s:repl_names()), {_, n -> stridx(n, a:arglead) == 0})
 endfunction
+" }}}
 
+" {{{ Stop
 function! reply#command#stop(bang) abort
     if s:not_supported()
         return
@@ -119,7 +122,9 @@ function! reply#command#stop(bang) abort
         call r.stop()
     endif
 endfunction
+" }}}
 
+" {{{ Send
 function! reply#command#send(str, line_start, line_end) abort
     if s:not_supported()
         return
@@ -151,7 +156,9 @@ function! reply#command#send(str, line_start, line_end) abort
     catch /^reply\.vim: /
     endtry
 endfunction
+" }}}
 
+" {{{ List
 function! reply#command#list() abort
     if s:not_supported()
         return
@@ -170,7 +177,9 @@ function! reply#command#list() abort
         endfor
     endfor
 endfunction
+" }}}
 
+" {{{ Recv
 function! reply#command#recv() abort
     if s:not_supported()
         return
@@ -202,7 +211,9 @@ function! reply#command#recv() abort
     call reply#log('Appended after current line', line('.'), output)
     execute 'silent' 'normal!' (len(output)+1) . '=='
 endfunction
+"  }}}
 
+" {{{ Send
 function! s:send_text_auto() abort
     if !exists('b:reply_auto_repl')
         call reply#log('b:reply_auto_repl is not found. Giving up :ReplAuto')
@@ -277,3 +288,4 @@ function! reply#command#auto(args, bang, mods, has_range, range_begin, range_end
     let b:reply_auto_prev_line = line('$')
     call reply#log('Automatic REPL', repl.name, 'setup for buffer', bufnr)
 endfunction
+" }}}
