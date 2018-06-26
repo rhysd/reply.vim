@@ -15,7 +15,7 @@ Describe :ReplRecv
         Repl node
         Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
         call term_sendkeys(bufnr('%'), "1 + 1\<CR>\<CR>1 +\<CR>1\<CR>")
-        Assert True(WithTimeout(1, {-> line('$') !=# 1}))
+        Assert True(WithTimeout(1, {-> line('$') >= 7}))
 
         execute bufwinnr(b) . 'wincmd w'
         ReplRecv

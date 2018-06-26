@@ -1,0 +1,56 @@
+Describe Variables
+    Before each
+        new!
+    End
+
+    After each
+        bwipeout!
+        for b in term_list()
+            execute 'bwipeout!' b
+        endfor
+    End
+
+    Describe reply_termwin_max_height
+        After each
+            unlet! g:reply_termwin_max_height
+            unlet! b:reply_termwin_max_height
+        End
+
+        It limits terminal window height
+            let g:reply_termwin_max_height = 3
+            botright Repl node
+            Assert Equals(winheight('%'), 3)
+        End
+
+        It does nothing when current height is less than the value
+            botright split
+            let height = winheight('%')
+            close!
+            let g:reply_termwin_max_height = 999
+            botright Repl node
+            Assert Equals(winheight('%'), height)
+        End
+    End
+
+    Describe reply_termwin_max_width
+        After each
+            unlet! g:reply_termwin_max_width
+            unlet! b:reply_termwin_max_width
+        End
+
+        It limits terminal window width
+            let g:reply_termwin_max_width = 3
+            Repl node
+            Assert Equals(winwidth('%'), 3)
+        End
+
+        It does nothing when current width is less than the value
+            vsplit
+            let width = winwidth('%')
+            close!
+            let g:reply_termwin_max_width = 999
+            Repl node
+            Assert Equals(winwidth('%'), width)
+        End
+    End
+End

@@ -108,13 +108,22 @@ function! reply#lifecycle#new(bufnr, name, cmdopts, mods) abort
         call reply#log('REPL', repl.name, 'was selected based on specified name')
     endif
 
-    call repl.start({
+    let context = {
         \   'source' : source,
         \   'source_bufnr' : a:bufnr,
         \   'on_close' : function('s:did_repl_end'),
         \   'cmdopts' : a:cmdopts,
         \   'mods' : a:mods,
-        \ })
+        \ }
+    let max_win_height = reply#var('termwin_max_height', v:null)
+    if type(max_win_height) == v:t_number
+        let context.termwin_max_height = max_win_height
+    endif
+    let max_win_width = reply#var('termwin_max_width', v:null)
+    if type(max_win_width) == v:t_number
+        let context.termwin_max_width = max_win_width
+    endif
+    call repl.start(context)
     call s:did_repl_start(repl)
 
     return repl

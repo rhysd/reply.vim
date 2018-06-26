@@ -88,6 +88,17 @@ function! s:base_start(context) dict abort
     let bufnr = term_start(cmd, options)
     call reply#log('Started terminal at', bufnr)
 
+    let winnr = winnr()
+    if has_key(a:context, 'termwin_max_height') && a:context.termwin_max_height < winheight(winnr)
+        call reply#log('Set terminal window', winnr, 'height to', a:context.termwin_max_height)
+        execute 'resize' a:context.termwin_max_height
+        " call execute('vertical resize ' . a:context.termwin_max_height, '')
+    endif
+    if has_key(a:context, 'termwin_max_width') && a:context.termwin_max_width < winwidth(winnr)
+        call reply#log('Set terminal window', winnr, 'width to', a:context.termwin_max_width)
+        execute 'vertical' 'resize' a:context.termwin_max_width
+    endif
+
     let self.term_bufnr = bufnr
     let self.running = v:true
 endfunction
