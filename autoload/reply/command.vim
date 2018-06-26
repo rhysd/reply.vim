@@ -213,27 +213,27 @@ function! reply#command#recv() abort
 endfunction
 "  }}}
 
-" {{{ Send
+" {{{ Auto
 function! s:send_text_auto() abort
-    if !exists('b:reply_auto_repl')
-        call reply#log('b:reply_auto_repl is not found. Giving up :ReplAuto')
+    if !exists('b:reply__auto_repl')
+        call reply#log('b:reply__auto_repl is not found. Giving up :ReplAuto')
         return
     endif
-    if !b:reply_auto_repl.running
-        call reply#log('REPL', b:reply_auto_repl.name, ' is not running. Giving up :ReplAuto')
+    if !b:reply__auto_repl.running
+        call reply#log('REPL', b:reply__auto_repl.name, ' is not running. Giving up :ReplAuto')
         return
     endif
 
     let newline = line('.')
-    let lines = getline(b:reply_auto_prev_line, newline - 1)
+    let lines = getline(b:reply__auto_prev_line, newline - 1)
 
     let text = join(lines, "\n")
     if text !~# '^\n*$'
         call reply#log('Automatically send text to buffer', string(text))
-        call b:reply_auto_repl.send_string(text)
+        call b:reply__auto_repl.send_string(text)
     endif
 
-    let b:reply_auto_prev_line = newline
+    let b:reply__auto_prev_line = newline
 endfunction
 
 function! s:cleanup_auto_setup(repl, exitval) abort
@@ -249,8 +249,8 @@ function! s:cleanup_auto_setup(repl, exitval) abort
     endif
 
     let b = getbufvar(bufnr, '')
-    unlet! b.reply_auto_prev_line
-    unlet! b.reply_auto_repl
+    unlet! b.reply__auto_prev_line
+    unlet! b.reply__auto_repl
 
     execute 'autocmd! plugin-reply-auto CursorMovedI <buffer=' . bufnr . '>'
 
@@ -280,12 +280,12 @@ function! reply#command#auto(args, bang, mods, has_range, range_begin, range_end
 
     augroup plugin-reply-auto
         autocmd!
-        autocmd CursorMovedI <buffer> if b:reply_auto_prev_line < line('.') | call <SID>send_text_auto() | endif
+        autocmd CursorMovedI <buffer> if b:reply__auto_prev_line < line('.') | call <SID>send_text_auto() | endif
     augroup END
 
     call repl.add_hook('on_close', function('s:cleanup_auto_setup'))
-    let b:reply_auto_repl = repl
-    let b:reply_auto_prev_line = line('$')
+    let b:reply__auto_repl = repl
+    let b:reply__auto_prev_line = line('$')
     call reply#log('Automatic REPL', repl.name, 'setup for buffer', bufnr)
 endfunction
 " }}}

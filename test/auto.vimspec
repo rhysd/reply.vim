@@ -15,7 +15,7 @@ Describe :ReplAuto
         let bufnr = bufnr('%')
         ReplAuto node
 
-        Assert Exists('b:reply_auto_repl')
+        Assert Exists('b:reply__auto_repl')
 
         " Cursor does not move
         Assert Equals(bufnr, bufnr('%'))
@@ -38,7 +38,7 @@ Describe :ReplAuto
         Assert Empty(term_list())
         " It takes some time to fire exit_cb after the terminal process is
         " killed.
-        Assert True(WithTimeout(1, {-> !exists('b:reply_auto_repl')}), 'b:reply_auto_repl exists after 1sec')
+        Assert True(WithTimeout(1, {-> !exists('b:reply__auto_repl')}), 'b:reply__auto_repl exists after 1sec')
         Assert False(exists('#plugin-reply-auto#CursorHoldI'), '#plugin-reply-auto#CursorHoldI exists after :ReplStop')
     End
 End
