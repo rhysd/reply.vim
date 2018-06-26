@@ -22,6 +22,20 @@ function! s:base_get_command() dict abort
 endfunction
 let s:base.get_command = function('s:base_get_command')
 
+function! s:base_adjust_win_size() dict abort
+    let winnr = winnr()
+    let c = self.context
+    if has_key(c, 'termwin_max_height') && c.termwin_max_height < winheight(winnr)
+        call reply#log('Set terminal window', winnr, 'height to', c.termwin_max_height)
+        execute 'resize' c.termwin_max_height
+    endif
+    if has_key(c, 'termwin_max_width') && c.termwin_max_width < winwidth(winnr)
+        call reply#log('Set terminal window', winnr, 'width to', c.termwin_max_width)
+        execute 'vertical' 'resize' c.termwin_max_width
+    endif
+endfunction
+let s:base.adjust_win_size = function('s:base_adjust_win_size')
+
 function! s:base__on_exit(channel, exitval) dict abort
     call reply#log('exit_cb callback with status', a:exitval, 'for', self.name)
 
@@ -52,8 +66,12 @@ let s:base._on_exit = function('s:base__on_exit')
 
 " context {
 "   source?: string;
-"   bufname?: string;
+"   source_bufnr?: number;
 "   cmdopts?: string[];
+"   mods?: string;
+"   termwin_max_height?: number;
+"   termwin_max_width?: number;
+"   on_close?: (r: REPL, exitval: number) => void;
 " }
 function! s:base_start(context) dict abort
     let self.context = a:context
@@ -88,16 +106,7 @@ function! s:base_start(context) dict abort
     let bufnr = term_start(cmd, options)
     call reply#log('Started terminal at', bufnr)
 
-    let winnr = winnr()
-    if has_key(a:context, 'termwin_max_height') && a:context.termwin_max_height < winheight(winnr)
-        call reply#log('Set terminal window', winnr, 'height to', a:context.termwin_max_height)
-        execute 'resize' a:context.termwin_max_height
-        " call execute('vertical resize ' . a:context.termwin_max_height, '')
-    endif
-    if has_key(a:context, 'termwin_max_width') && a:context.termwin_max_width < winwidth(winnr)
-        call reply#log('Set terminal window', winnr, 'width to', a:context.termwin_max_width)
-        execute 'vertical' 'resize' a:context.termwin_max_width
-    endif
+    call self.adjust_win_size()
 
     let self.term_bufnr = bufnr
     let self.running = v:true
@@ -123,6 +132,7 @@ function! s:base_into_terminal_job_mode() dict abort
         let mods = has_key(self.context, 'mods') && self.context.mods !=# '' ?
                     \ self.context.mods : 'vertical'
         execute mods 'sbuffer' self.term_bufnr
+        call self.adjust_win_size()
     endif
 
     if mode() ==# 'n' && self.running

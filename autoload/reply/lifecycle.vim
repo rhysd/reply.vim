@@ -111,7 +111,6 @@ function! reply#lifecycle#new(bufnr, name, cmdopts, mods) abort
     let context = {
         \   'source' : source,
         \   'source_bufnr' : a:bufnr,
-        \   'on_close' : function('s:did_repl_end'),
         \   'cmdopts' : a:cmdopts,
         \   'mods' : a:mods,
         \ }
@@ -123,6 +122,9 @@ function! reply#lifecycle#new(bufnr, name, cmdopts, mods) abort
     if type(max_win_width) == v:t_number
         let context.termwin_max_width = max_win_width
     endif
+    call reply#log('Will start REPL with context', context)
+    " Avoid messing up log
+    let context.on_close = function('s:did_repl_end')
     call repl.start(context)
     call s:did_repl_start(repl)
 
