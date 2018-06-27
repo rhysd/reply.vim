@@ -8,10 +8,7 @@ Describe :ReplSend
     End
 
     After each
-        bwipeout!
-        for b in term_list()
-            execute 'bwipeout!' b
-        endfor
+        call Cleanup()
     End
 
     It sends text to terminal window as arguments

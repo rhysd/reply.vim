@@ -4,20 +4,18 @@ Describe :ReplRecv
     End
 
     After each
-        bwipeout!
-        for b in term_list()
-            execute 'bwipeout!' b
-        endfor
+        call Cleanup()
     End
 
     It extracts user input from terminal window
         let b = bufnr('%')
         Repl node
         Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
-        call term_sendkeys(bufnr('%'), "1 + 1\<CR>\<CR>1 +\<CR>1\<CR>")
-        Assert True(WithTimeout(1, {-> line('$') >= 7}))
-
         execute bufwinnr(b) . 'wincmd w'
+
+        call term_sendkeys(term_list()[0], "1 + 1\<CR>\<CR>1 +\<CR>1\<CR>")
+        call WithTimeout(1, {-> len(getbufline(1, '$')) >= 7})
+
         ReplRecv
 
         let expected = [
@@ -35,10 +33,11 @@ Describe :ReplRecv
         let b = bufnr('%')
         Repl node
         Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
-        call term_sendkeys(bufnr('%'), "function foo() {\<CR>return 'foo';\<CR>}\<CR>")
-        Assert True(WithTimeout(1, {-> line('$') !=# 1}))
-
         execute bufwinnr(b) . 'wincmd w'
+
+        call term_sendkeys(term_list()[0], "function foo() {\<CR>return 'foo';\<CR>}\<CR>")
+        call WithTimeout(1, {-> len(getbufline(1, '$')) >= 5})
+
         ReplRecv
 
         let expected = [

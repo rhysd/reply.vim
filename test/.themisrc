@@ -18,6 +18,14 @@ function! WithTimeout(timeout, pred) abort
     return 1
 endfunction
 
+function! Cleanup() abort
+    while len(getwininfo()) > 1
+        bwipeout!
+    endwhile
+    bwipeout!
+    call WithTimeout(1, {-> empty(reply#lifecycle#running_repls())})
+endfunction
+
 function! AssetPath(filename) abort
     return join(['test', 'assets', a:filename], s:path_sep)
 endfunction

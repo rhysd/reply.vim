@@ -4,10 +4,7 @@ Describe :ReplStop
     End
 
     After each
-        bwipeout!
-        for b in term_list()
-            execute 'bwipeout!' b
-        endfor
+        call Cleanup()
     End
 
     It closes a terminal window and remove terminal buffer

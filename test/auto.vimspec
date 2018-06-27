@@ -4,11 +4,7 @@ Describe :ReplAuto
     End
 
     After each
-        bwipeout!
-        for b in term_list()
-            execute 'bwipeout!' b
-        endfor
-        call WithTimeout(1, {-> empty(reply#lifecycle#running_repls())})
+        call Cleanup()
     End
 
     It automatically sends current buffer input to REPL
@@ -18,7 +14,7 @@ Describe :ReplAuto
         Assert Exists('b:reply__auto_repl')
 
         " Cursor does not move
-        Assert Equals(bufnr, bufnr('%'))
+        Assert Equals(bufnr, bufnr('%'), string(term_list()))
 
         " Emulate key input
         call setline('.', ['function foo() {}', ''])

@@ -249,8 +249,8 @@ function! s:cleanup_auto_setup(repl, exitval) abort
     endif
 
     let b = getbufvar(bufnr, '')
-    unlet! b.reply__auto_prev_line
-    unlet! b.reply__auto_repl
+    silent! unlet! b.reply__auto_prev_line
+    silent! unlet! b.reply__auto_repl
 
     execute 'autocmd! plugin-reply-auto CursorMovedI <buffer=' . bufnr . '>'
 

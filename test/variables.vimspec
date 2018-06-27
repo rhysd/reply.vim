@@ -4,10 +4,7 @@ Describe Variables
     End
 
     After each
-        bwipeout!
-        for b in term_list()
-            execute 'bwipeout!' b
-        endfor
+        call Cleanup()
     End
 
     Describe reply_termwin_max_height
