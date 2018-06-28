@@ -1,9 +1,5 @@
 Describe :ReplAuto
     Before each
-        new!
-    End
-
-    After each
         call Cleanup()
     End
 

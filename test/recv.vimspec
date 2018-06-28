@@ -1,9 +1,5 @@
 Describe :ReplRecv
     Before each
-        new!
-    End
-
-    After each
         call Cleanup()
     End
 

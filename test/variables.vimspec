@@ -1,9 +1,5 @@
 Describe Variables
     Before each
-        new!
-    End
-
-    After each
         call Cleanup()
     End
 

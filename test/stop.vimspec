@@ -1,9 +1,5 @@
 Describe :ReplStop
     Before each
-        new!
-    End
-
-    After each
         call Cleanup()
     End
 

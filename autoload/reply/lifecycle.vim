@@ -135,6 +135,10 @@ function! reply#lifecycle#running_repls() abort
     return filter(copy(s:repls), {_, r -> r.running})
 endfunction
 
+function! reply#lifecycle#all_repls() abort
+    return copy(s:repls)
+endfunction
+
 function! reply#lifecycle#repl_for_buf(bufnr) abort
     for r in s:repls
         if has_key(r.context, 'source_bufnr') && r.context.source_bufnr == a:bufnr ||

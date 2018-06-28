@@ -23,7 +23,7 @@ function! Cleanup() abort
         bwipeout!
     endwhile
     bwipeout!
-    call WithTimeout(1, {-> empty(reply#lifecycle#running_repls())})
+    call WithTimeout(1, {-> empty(reply#lifecycle#all_repls())})
 endfunction
 
 function! AssetPath(filename) abort

@@ -1,14 +1,10 @@
 Describe :ReplSend
     Before each
-        new!
+        call Cleanup()
         Repl node
         let term_winnr = winnr()
         call WithTimeout(1, {-> getline('.') !=# ''})
         wincmd p
-    End
-
-    After each
-        call Cleanup()
     End
 
     It sends text to terminal window as arguments

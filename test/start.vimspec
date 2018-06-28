@@ -1,9 +1,5 @@
 Describe :Repl
     Before each
-        new!
-    End
-
-    After each
         call Cleanup()
     End
 
