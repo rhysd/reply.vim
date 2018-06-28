@@ -32,10 +32,10 @@ function! s:repl_names() abort
 endfunction
 
 function! s:not_supported() abort
-    if !has('nvim') && (v:version >= 801 || v:version == 800 && has('patch803'))
+    if has('nvim') || (v:version >= 801 || v:version == 800 && has('patch803'))
         return 0
     endif
-    call reply#error('This version is not supported. reply.vim requires Vim 8.0.803 or later')
+    call reply#error('This version is not supported. reply.vim requires Vim 8.0.803+ or Neovim')
     return 1
 endfunction
 

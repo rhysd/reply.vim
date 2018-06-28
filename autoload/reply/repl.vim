@@ -36,7 +36,8 @@ function! s:base_adjust_win_size() dict abort
 endfunction
 let s:base.adjust_win_size = function('s:base_adjust_win_size')
 
-function! s:base__on_exit(channel, exitval) dict abort
+" Note: 3rd argument is for Neovim
+function! s:base__on_exit(channel, exitval, ...) dict abort
     call reply#log('exit_cb callback with status', a:exitval, 'for', self.name)
 
     if has_key(self.context, 'on_close')
@@ -64,6 +65,55 @@ function! s:base__on_exit(channel, exitval) dict abort
 endfunction
 let s:base._on_exit = function('s:base__on_exit')
 
+function! s:base_open_term(cmd) dict abort
+    if has('nvim')
+        if has_key(self.context, 'mods') && self.context.mods !=# ''
+            execute self.context.mods . ' new'
+        else
+            execute 'vnew'
+        endif
+
+        call reply#log('Will start terminal with command', a:cmd)
+
+        " Use function() to bind self to _on_exit. Otherwise, job on
+        " Neovim calls the callback with its options dict as receiver.
+        let ret = termopen(a:cmd, {'on_exit' : function(self._on_exit, [], self)})
+        if ret == 0
+            throw reply#errror('Invalid argument for command %s', string(a:cmd))
+        elseif ret == -1
+            throw reply#errror('Command for REPL %s is not executable: %s', self.name, string(a:cmd))
+        endif
+        startinsert
+
+        let b:term_title = 'reply: ' . self.name
+
+        let bufnr = bufnr('%')
+        call reply#log('Started terminal at', bufnr, 'on Neovim')
+        let self.term_bufnr = bufnr
+    else
+        let options = {
+            \   'term_name' : 'reply: ' . self.name,
+            \   'term_finish' : 'open',
+            \ }
+        if has_key(self.context, 'mods') && self.context.mods !=# ''
+            let options.term_opencmd = self.context.mods . ' sbuffer %d'
+        else
+            " If no <mods> command is specified, splitting vertically is default
+            let options.vertical = 1
+        endif
+
+        call reply#log('Will start terminal with command', a:cmd, 'and with options', options)
+
+        " Set callbacks after logging to avoid mess up it
+        let options.exit_cb = self._on_exit
+
+        let bufnr = term_start(a:cmd, options)
+        call reply#log('Started terminal at', bufnr, 'on Vim')
+        let self.term_bufnr = bufnr
+    endif
+endfunction
+let s:base.open_term = function('s:base_open_term')
+
 " context {
 "   source?: string;
 "   source_bufnr?: number;
@@ -87,41 +137,15 @@ function! s:base_start(context) dict abort
         let cmd = [cmd]
     endif
 
-    let options = {
-        \   'term_name' : 'reply: ' . self.name,
-        \   'term_finish' : 'open',
-        \ }
-    if has_key(a:context, 'mods') && a:context.mods !=# ''
-        let options.term_opencmd = a:context.mods . ' sbuffer %d'
-    else
-        " If no <mods> command is specified, splitting vertically is default
-        let options.vertical = 1
-    endif
-
-    call reply#log('Will start terminal with command', cmd, 'and with options', options)
-
-    " Set callbacks after logging to avoid mess up it
-    let options.exit_cb = self._on_exit
-
-    let bufnr = term_start(cmd, options)
-    call reply#log('Started terminal at', bufnr)
-
+    call self.open_term(cmd)
     call self.adjust_win_size()
 
-    let self.term_bufnr = bufnr
     let self.running = v:true
 endfunction
 let s:base.start = function('s:base_start')
 
-function! s:base_into_terminal_job_mode() dict abort
+function! s:base_into_terminal() dict abort
     if bufnr('%') ==# self.term_bufnr
-        if mode() ==# 't'
-            return
-        endif
-        " Start Terminal-Job mode if job is alive
-        if self.running
-            normal! i
-        endif
         return
     endif
 
@@ -134,9 +158,17 @@ function! s:base_into_terminal_job_mode() dict abort
         execute mods 'sbuffer' self.term_bufnr
         call self.adjust_win_size()
     endif
+endfunction
+let s:base.into_terminal = function('s:base_into_terminal')
 
-    if mode() ==# 'n' && self.running
-        " Start Terminal-Job mode if job is alive
+function! s:base_into_terminal_job_mode() dict abort
+    call self.into_terminal()
+    let mode = mode()
+    if mode ==# 't'
+        return
+    endif
+    " Start Terminal-Job mode if job is alive
+    if mode ==# 'n' && self.running
         normal! i
     endif
 endfunction
@@ -159,9 +191,15 @@ function! s:base_send_string(str) dict abort
     " Note: Need to enter Terminal-Job mode for updating the terminal window
 
     let prev_winnr = winnr()
-    call self.into_terminal_job_mode()
 
-    call term_sendkeys(self.term_bufnr, str)
+    if has('nvim')
+        " Don't need to enter terminal-job mode for sending keys to REPL on Neovim
+        call self.into_terminal()
+        call jobsend(getbufvar(self.term_bufnr, '&channel'), [str])
+    else
+        call self.into_terminal_job_mode()
+        call term_sendkeys(self.term_bufnr, str)
+    endif
     call reply#log('String was sent to', self.name, ':', str)
 
     if winnr() != prev_winnr
@@ -214,6 +252,20 @@ function! s:base_extract_user_input(start_line, end_line) dict abort
     let lines = getbufline(self.term_bufnr, a:start_line, a:end_line)
     if lines == [] || lines == ['']
         throw reply#error("Terminal buffer #d for REPL '%s' is empty", self.term_bufnr, self.name)
+    endif
+
+    " On Neovim, many empty lines are continued by the bottom of the terminal window
+    " e.g. ['> 1 + 1', '2', '> ', '', '', '', '', '', ..., '']
+    " Trim trailing empty lines.
+    let i = len(lines) - 1
+    while i >= 0
+        if lines[i] !=# ''
+            break
+        endif
+        let i -= 1
+    endwhile
+    if i != len(lines) - 1
+        let lines = lines[: i]
     endif
 
     let exprs = self.extract_input_from_terminal_buf(lines)
