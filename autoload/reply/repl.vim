@@ -206,12 +206,12 @@ function! s:base_extract_input_from_terminal_buf(lines) dict abort
 endfunction
 let s:base.extract_input_from_terminal_buf = function('s:base_extract_input_from_terminal_buf')
 
-function! s:base_extract_user_input() dict abort
+function! s:base_extract_user_input(start_line, end_line) dict abort
     if !bufexists(self.term_bufnr)
         throw reply#error("Terminal buffer #d for REPL '%s' is no longer existing", self.term_bufnr, self.name)
     endif
 
-    let lines = getbufline(self.term_bufnr, 1, '$')
+    let lines = getbufline(self.term_bufnr, a:start_line, a:end_line)
     if lines == [] || lines == ['']
         throw reply#error("Terminal buffer #d for REPL '%s' is empty", self.term_bufnr, self.name)
     endif

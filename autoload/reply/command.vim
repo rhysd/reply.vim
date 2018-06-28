@@ -39,6 +39,21 @@ function! s:not_supported() abort
     return 1
 endfunction
 
+function! s:move_to_buf(bufnr) abort
+    if bufnr('%') == a:bufnr
+        return
+    endif
+    if !bufexists(a:bufnr)
+        throw reply#error('Cannot open buffer #%d since it does not exist.', a:bufnr)
+    endif
+    let winnr = bufwinnr(a:bufnr)
+    if winnr != -1
+        execute winnr . 'wincmd w'
+        return
+    endif
+    execute 'sbuffer' a:bufnr
+endfunction
+
 " {{{ Start
 function! s:open_repl(name, cmdopts, always_new, with_text, mods) abort
     call reply#log('Will open REPL terminal for', a:name, 'Configuraiton:', a:cmdopts, a:always_new, a:with_text, a:mods)
@@ -180,12 +195,13 @@ endfunction
 " }}}
 
 " {{{ Recv
-function! reply#command#recv() abort
+function! reply#command#recv(has_range, start_line, end_line) abort
     if s:not_supported()
         return
     endif
 
     let bufnr = bufnr('%')
+    let winnr = winnr()
     try
         let repl = reply#lifecycle#repl_for_buf(bufnr)
     catch /^reply\.vim: /
@@ -196,11 +212,22 @@ function! reply#command#recv() abort
         return
     endif
 
+    let in_terminal = repl.term_bufnr == bufnr
+    if in_terminal && (!has_key(repl.context, 'source_bufnr') || !bufexists(repl.context.source_bufnr))
+        call reply#error('Buffer which is related to terminal (bufnr=%d) does not exist', bufnr)
+        return
+    endif
+
+    let use_range = in_terminal && a:has_range
     try
-        let exprs = repl.extract_user_input()
+        let exprs = repl.extract_user_input(use_range ? a:start_line : 1, use_range ? a:end_line : '$')
     catch /^reply\.vim: /
         return
     endtry
+
+    if in_terminal
+        call s:move_to_buf(repl.context.source_bufnr)
+    endif
 
     " Expression may contain newlines. Separate them into lines.
     let output = []
@@ -210,6 +237,11 @@ function! reply#command#recv() abort
     call append('.', output)
     call reply#log('Appended after current line', line('.'), output)
     execute 'silent' 'normal!' (len(output)+1) . '=='
+
+    if in_terminal
+        " Going back to terminal
+        execute winnr . 'wincmd w'
+    endif
 endfunction
 "  }}}
 

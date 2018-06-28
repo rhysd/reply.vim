@@ -44,4 +44,46 @@ Describe :ReplRecv
             \ ]
         Assert Equals(getline(1, '$'), expected)
     End
+
+    It sends user input to buffer in terminal window
+        let from = bufnr('%')
+        Repl node
+        Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
+
+        call term_sendkeys(bufnr('%'), "1 + 1\<CR>\<CR>1 +\<CR>1\<CR>")
+        call WithTimeout(1, {-> len(getbufline(1, '$')) >= 7})
+
+        ReplRecv
+
+        let expected = [
+            \   '',
+            \   '1 + 1',
+            \   '1 +',
+            \   '1',
+            \ ]
+        Assert Equals(getbufline(from, 1, '$'), expected)
+    End
+
+    It sends user input to buffer in terminal window
+        let from = bufnr('%')
+        Repl node
+        Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
+
+        call term_sendkeys(bufnr('%'), "1 + 1\<CR>\<CR>1 +\<CR>1\<CR>")
+        call WithTimeout(1, {-> len(getbufline(1, '$')) >= 7})
+
+        " XXX: Cannot test :ReplRecv for this case since Vim script cannot
+        " leave from Terminal-Job mode. Instead, testing the case by calling
+        " reply#command#recv() directly.
+        let l = line('$')
+        " Specify only line '> 1 +' and line '... 1'
+        call reply#command#recv(1, l-3, l-2)
+
+        let expected = [
+            \   '',
+            \   '1 +',
+            \   '1',
+            \ ]
+        Assert Equals(getbufline(from, 1, '$'), expected)
+    End
 End

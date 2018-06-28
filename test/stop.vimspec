@@ -11,6 +11,7 @@ Describe :ReplStop
         Assert Empty(term_list())
         Assert Equals(bufwinnr(b), -1)
         Assert True(WithTimeout(1, {-> empty(reply#lifecycle#running_repls())}))
+        Assert True(WithTimeout(1, {-> empty(reply#lifecycle#all_repls())}))
     End
 
     It closes a terminal window even in it
@@ -24,6 +25,7 @@ Describe :ReplStop
         Assert Empty(term_list())
         Assert Equals(bufwinnr(b), -1)
         Assert True(WithTimeout(1, {-> empty(reply#lifecycle#running_repls())}))
+        Assert True(WithTimeout(1, {-> empty(reply#lifecycle#all_repls())}))
     End
 
     It closes only the latest terminal window
@@ -35,6 +37,7 @@ Describe :ReplStop
         Assert Equals(term_list(), [b1])
         Assert Equals(bufwinnr(b2), -1)
         Assert True(WithTimeout(1, {-> len(reply#lifecycle#running_repls()) == 1}))
+        Assert True(WithTimeout(1, {-> len(reply#lifecycle#all_repls()) == 1}))
     End
 
     It closes all terminal windows with bang
@@ -50,6 +53,7 @@ Describe :ReplStop
         " Back to the original buffer since all buffers were closed
         Assert Equals(bufnr('%'), b)
         Assert True(WithTimeout(1, {-> empty(reply#lifecycle#running_repls())}))
+        Assert True(WithTimeout(1, {-> empty(reply#lifecycle#all_repls())}))
     End
 
     It does nothing but showing message when no REPL is running
