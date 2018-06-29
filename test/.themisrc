@@ -26,6 +26,83 @@ function! Cleanup() abort
     call WithTimeout(1, {-> empty(reply#lifecycle#all_repls())})
 endfunction
 
+function! TermSendkeys(bufnr, str) abort
+    if has('nvim')
+        call jobsend(getbufvar(a:bufnr, '&channel'), [a:str])
+    else
+        call term_sendkeys(a:bufnr, a:str)
+    endif
+endfunction
+
+function! TermList() abort
+    if has('nvim')
+        return filter(map(getbufinfo(), {_, i -> i.bufnr}), {_, b -> getbufvar(b, '&channel') != 0})
+    else
+        return term_list()
+    endif
+endfunction
+
+function! s:trim_trailing_empty_lines(lines) abort
+    let i = len(a:lines) - 1
+    while i >= 0
+        if a:lines[i] !=# ''
+            break
+        endif
+        let i -= 1
+    endwhile
+    if i < 0
+        return []
+    endif
+    if i == len(a:lines) - 1
+        return a:lines
+    endif
+    let lines = a:lines
+    return lines[: i]
+endfunction
+
+function! GetTermLine(bufnr, start, ...) abort
+    if a:0 == 0
+        return getbufline(a:bufnr, a:start)
+    endif
+    let lines = getbufline(a:bufnr, a:start, a:1)
+    if !has('nvim') || len(lines) == 0
+        return lines
+    endif
+    return s:trim_trailing_empty_lines(lines)
+endfunction
+
+function! LinesInTerm(...) abort
+    if !has('nvim')
+        return a:000
+    endif
+    " In Neovim terminal, trailing spaces are removed automatically from
+    " terminal buffer.
+    return map(copy(a:000), {_, l -> substitute(l, '\s\+$', '', '')})
+endfunction
+
+function! LineInTerm(line) abort
+    if !has('nvim')
+        return a:line
+    endif
+    " In Neovim terminal, trailing spaces are removed automatically from
+    " terminal buffer.
+    return substitute(a:line, '\s\+$', '', '')
+endfunction
+
+function! TermLastLine() abort
+    if !has('nvim')
+        return line('$')
+    endif
+    let l = line('$')
+    while l > 0
+        if getline(l) !=# ''
+            return l
+        endif
+        let l -= 1
+    endwhile
+    return l
+endfunction
+
 function! AssetPath(filename) abort
     return join(['test', 'assets', a:filename], s:path_sep)
 endfunction
@@ -51,9 +128,41 @@ function! AssertContains(heystack, needle) abort
     return 1
 endfunction
 
+function! AssertInTerminal() abort
+    if !has('nvim')
+        let m = mode()
+        if m !=# 't'
+            throw themis#failure(printf('Not in terminal (mode=%s)', m))
+        endif
+        return 1
+    endif
+    if &buftype != 'terminal'
+        throw themis#failure(printf('Not in terminal (buftype=%s)', &buftype))
+    endif
+    return 1
+endfunction
+
+function! AssertTermTitle(title) abort
+    if !has('nvim')
+        let t = bufname('%')
+        if t != a:title
+            throw themis#failure(printf("Terminal title should be '%s', but actually '%s'", a:title, t))
+        endif
+        return 1
+    endif
+    let t = b:term_title
+    let c = matchstr(a:title, '^reply: \zs.*$')
+    if b:term_title !~# c . '$'
+        throw themis#failure(printf("Terminal title '%s' does not ends with command name '%s'", b:term_title, c))
+    endif
+    return 1
+endfunction
+
 let s:helper = themis#helper('assert')
 let s:helper['last_message'] = function('AssertLastMessage')
 let s:helper['contains'] = function('AssertContains')
+let s:helper['in_terminal'] = function('AssertInTerminal')
+let s:helper['term_title'] = function('AssertTermTitle')
 call themis#helper('command').with(s:helper)
 
 let g:reply__enable_debug = 0

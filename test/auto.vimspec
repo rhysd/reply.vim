@@ -3,14 +3,14 @@ Describe :ReplAuto
         call Cleanup()
     End
 
-    It automatically sends current buffer input to REPL
+    It automatically sends current buffer input to REPL in terminal
         let bufnr = bufnr('%')
         ReplAuto node
 
         Assert Exists('b:reply__auto_repl')
 
         " Cursor does not move
-        Assert Equals(bufnr, bufnr('%'), string(term_list()))
+        Assert Equals(bufnr, bufnr('%'), printf('bufnr=%d, %%=%d, terms=%s', bufnr, bufnr('%'), TermList()))
 
         " Emulate key input
         call setline('.', ['function foo() {}', ''])
@@ -19,15 +19,15 @@ Describe :ReplAuto
 
         " Note: themis.vim does not seem to support insert mode
 
-        let bufnr = term_list()[0]
-        Assert True(WithTimeout(1, {-> len(getbufline(bufnr, 1, '$')) !=# 1}))
+        let bufnr = TermList()[0]
+        Assert True(WithTimeout(1, {-> len(GetTermLine(bufnr, 1, '$')) == 4}))
         Assert Equals(
-            \   getbufline(bufnr, 1, '$')[-3:],
-            \   ['> function foo() {}', 'undefined', '> ']
+            \   GetTermLine(bufnr, 1, '$')[-3:],
+            \   LinesInTerm('> function foo() {}', 'undefined', '> ')
             \ )
 
         ReplStop
-        Assert Empty(term_list())
+        Assert Empty(TermList())
         " It takes some time to fire exit_cb after the terminal process is
         " killed.
         Assert True(WithTimeout(1, {-> !exists('b:reply__auto_repl')}), 'b:reply__auto_repl exists after 1sec')

@@ -9,7 +9,7 @@ Describe :ReplRecv
         Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
         execute bufwinnr(b) . 'wincmd w'
 
-        call term_sendkeys(term_list()[0], "1 + 1\<CR>\<CR>1 +\<CR>1\<CR>")
+        call TermSendkeys(TermList()[0], "1 + 1\<CR>\<CR>1 +\<CR>1\<CR>")
         call WithTimeout(1, {-> len(getbufline(1, '$')) >= 7})
 
         ReplRecv
@@ -31,7 +31,7 @@ Describe :ReplRecv
         Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
         execute bufwinnr(b) . 'wincmd w'
 
-        call term_sendkeys(term_list()[0], "function foo() {\<CR>return 'foo';\<CR>}\<CR>")
+        call TermSendkeys(TermList()[0], "function foo() {\<CR>return 'foo';\<CR>}\<CR>")
         call WithTimeout(1, {-> len(getbufline(1, '$')) >= 5})
 
         ReplRecv
@@ -50,7 +50,7 @@ Describe :ReplRecv
         Repl node
         Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
 
-        call term_sendkeys(bufnr('%'), "1 + 1\<CR>\<CR>1 +\<CR>1\<CR>")
+        call TermSendkeys(bufnr('%'), "1 + 1\<CR>\<CR>1 +\<CR>1\<CR>")
         call WithTimeout(1, {-> len(getbufline(1, '$')) >= 7})
 
         ReplRecv
@@ -69,13 +69,13 @@ Describe :ReplRecv
         Repl node
         Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
 
-        call term_sendkeys(bufnr('%'), "1 + 1\<CR>\<CR>1 +\<CR>1\<CR>")
-        call WithTimeout(1, {-> len(getbufline(1, '$')) >= 7})
+        call TermSendkeys(bufnr('%'), "1 + 1\<CR>\<CR>1 +\<CR>1\<CR>")
+        call WithTimeout(1, {-> len(GetTermLine(bufnr('%'), 1, '$')) >= 7})
 
         " XXX: Cannot test :ReplRecv for this case since Vim script cannot
         " leave from Terminal-Job mode. Instead, testing the case by calling
         " reply#command#recv() directly.
-        let l = line('$')
+        let l = TermLastLine()
         " Specify only line '> 1 +' and line '... 1'
         call reply#command#recv(1, l-3, l-2)
 

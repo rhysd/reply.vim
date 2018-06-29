@@ -10,16 +10,16 @@ Describe :ReplSend
     It sends text to terminal window as arguments
         ReplSend 1 + 1
         execute term_winnr . 'wincmd w'
-        Assert True(WithTimeout(1, {-> line('$') > 1}))
-        Assert Equals(getline(1, '$'), ['> 1 + 1', '2', '> '])
+        Assert True(WithTimeout(1, {-> TermLastLine() > 1}))
+        Assert Equals(GetTermLine(TermList()[0], 1, '$'), LinesInTerm('> 1 + 1', '2', '> '))
     End
 
     It sends current line to terminal window
         call setline('.', ['1 + 1'])
         ReplSend
         execute term_winnr . 'wincmd w'
-        Assert True(WithTimeout(1, {-> line('$') > 1}))
-        Assert Equals(getline(1, '$'), ['> 1 + 1', '2', '> '])
+        Assert True(WithTimeout(1, {-> TermLastLine() > 1}))
+        Assert Equals(GetTermLine(TermList()[0], 1, '$'), LinesInTerm('> 1 + 1', '2', '> '))
     End
 
     It sends selected lines to terminal window in visual mode
@@ -27,8 +27,8 @@ Describe :ReplSend
         normal! ggVGygv
         '<,'>ReplSend
         execute term_winnr . 'wincmd w'
-        Assert True(WithTimeout(1, {-> line('$') > 1}))
-        let expected = [
+        Assert True(WithTimeout(1, {-> TermLastLine() > 1}))
+        let expected = LinesInTerm(
         \   '> function hello(name) {',
         \   '...   console.log("hello,", name);',
         \   '... }',
@@ -37,13 +37,13 @@ Describe :ReplSend
         \   'hello, Vim',
         \   'undefined',
         \   '> ',
-        \ ]
-        Assert Equals(getline(1, '$'), expected)
+        \ )
+        Assert Equals(GetTermLine(TermList()[0], 1, '$'), expected)
     End
 
     It does nothing when terminal is not started
         " Ensure all terminals are closed
-        for b in term_list()
+        for b in TermList()
             execute 'bdelete!' b
         endfor
         call WithTimeout(1, {-> empty(reply#lifecycle#running_repls())})

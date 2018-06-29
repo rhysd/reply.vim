@@ -6,9 +6,9 @@ Describe :ReplStop
     It closes a terminal window and remove terminal buffer
         Repl node
         let b = bufnr('%')
-        Assert Equals(term_list()[0], b)
+        Assert Equals(TermList()[0], b)
         ReplStop
-        Assert Empty(term_list())
+        Assert Empty(TermList())
         Assert Equals(bufwinnr(b), -1)
         Assert True(WithTimeout(1, {-> empty(reply#lifecycle#running_repls())}))
         Assert True(WithTimeout(1, {-> empty(reply#lifecycle#all_repls())}))
@@ -17,12 +17,12 @@ Describe :ReplStop
     It closes a terminal window even in it
         Repl node
         let b = bufnr('%')
-        Assert Equals(term_list()[0], b)
+        Assert Equals(TermList()[0], b)
         let w = bufwinnr(b)
         Assert NotEquals(w, -1)
         execute w . 'wincmd w'
         ReplStop
-        Assert Empty(term_list())
+        Assert Empty(TermList())
         Assert Equals(bufwinnr(b), -1)
         Assert True(WithTimeout(1, {-> empty(reply#lifecycle#running_repls())}))
         Assert True(WithTimeout(1, {-> empty(reply#lifecycle#all_repls())}))
@@ -34,7 +34,7 @@ Describe :ReplStop
         Repl! node
         let b2 = bufnr('%')
         ReplStop
-        Assert Equals(term_list(), [b1])
+        Assert Equals(TermList(), [b1])
         Assert Equals(bufwinnr(b2), -1)
         Assert True(WithTimeout(1, {-> len(reply#lifecycle#running_repls()) == 1}))
         Assert True(WithTimeout(1, {-> len(reply#lifecycle#all_repls()) == 1}))
@@ -47,7 +47,7 @@ Describe :ReplStop
         Repl! node
         let b2 = bufnr('%')
         ReplStop!
-        Assert Empty(term_list())
+        Assert Empty(TermList())
         Assert Equals(bufwinnr(b1), -1)
         Assert Equals(bufwinnr(b2), -1)
         " Back to the original buffer since all buffers were closed
@@ -75,26 +75,26 @@ Describe REPL
 
     After each
         bwipeout!
-        for b in term_list()
+        for b in TermList()
             execute 'bwipeout!' b
         endfor
     End
 
     It can be closed with :bdelete!
         Repl node
-        execute 'bdelete!' term_list()[0]
-        Assert Empty(term_list())
+        execute 'bdelete!' TermList()[0]
+        Assert Empty(TermList())
         Assert True(WithTimeout(1, {-> empty(reply#lifecycle#running_repls())}))
     End
 
     It can be closed with :quit
         Repl node
-        let b = term_list()[0]
+        let b = TermList()[0]
         let w = bufwinnr(b)
         Assert NotEquals(w, -1)
         execute w . 'wincmd w'
         quit!
-        Assert Empty(term_list())
+        Assert Empty(TermList())
         Assert True(WithTimeout(1, {-> empty(reply#lifecycle#running_repls())}))
     End
 
@@ -102,7 +102,7 @@ Describe REPL
         let prev = bufnr('%')
         Repl node
         execute bufwinnr(prev) . 'wincmd w'
-        let b = term_list()[0]
+        let b = TermList()[0]
         let w = bufwinnr(b)
         Assert NotEquals(w, -1)
         execute w . 'close!'
