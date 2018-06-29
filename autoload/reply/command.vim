@@ -304,7 +304,7 @@ function! reply#command#auto(args, bang, mods, has_range, range_begin, range_end
     endtry
 
     if bufnr != bufnr('%')
-        let w = winbufnr(bufnr)
+        let w = bufwinnr(bufnr)
         if winnr() != w
             execute w . 'wincmd w'
         endif
