@@ -1,0 +1,26 @@
+Describe node
+    Before each
+        call Cleanup()
+    End
+
+    It works with :Repl, :ReplSend, :ReplRecv and :ReplStop
+        let bufnr = bufnr('%')
+        Repl node
+        Assert InTerminal()
+        Assert True(WithTimeout(1, {-> getline('.') !=# ''}))
+        Assert Equals(getline('.'), LineInTerm('> '))
+        Assert TermTitle('reply: node')
+        call TermSendkeys(bufnr('%'), "1 + 1\<CR>")
+        Assert True(WithTimeout(1, {-> TermLastLine() > 1}))
+        Assert Equals(GetTermLine(bufnr('%'), 1, '$'), LinesInTerm('> 1 + 1', '2', '> '))
+        ReplSend 2 + 3
+        Assert True(WithTimeout(1, {-> TermLastLine() > 3}))
+        Assert Equals(GetTermLine(bufnr('%'), 3, '$'), LinesInTerm('> 2 + 3', '5', '> '))
+        execute bufwinnr(bufnr) . 'wincmd w'
+        ReplRecv
+        Assert Equals(getline(1, '$'), ['', '1 + 1', '2 + 3'])
+        ReplStop
+        Assert Empty(TermList())
+        Assert True(WithTimeout(1, {-> empty(reply#lifecycle#running_repls())}))
+    End
+End
