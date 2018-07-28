@@ -1,0 +1,27 @@
+Describe python
+    Before each
+        call Cleanup()
+    End
+
+    It works with :Repl, :ReplSend, :ReplRecv and :ReplStop
+        let bufnr = bufnr('%')
+        Repl python
+        Assert InTerminal()
+        Assert WithTimeout(1, {-> getline('.') !=# ''})
+        let line_start = TermLastLine()
+        Assert Equals(getline(line_start), LineInTerm('>>> '))
+        Assert TermTitle('reply: python')
+        call TermSendkeys(bufnr('%'), "1 + 1\<CR>")
+        Assert WithTimeout(1, {-> TermLastLine() > line_start + 1})
+        Assert Equals(GetTermLine(bufnr('%'), line_start, '$'), LinesInTerm('>>> 1 + 1', '2', '>>> '))
+        ReplSend 2 + 3
+        Assert True(WithTimeout(1, {-> TermLastLine() > line_start + 3}))
+        Assert Equals(GetTermLine(bufnr('%'), line_start + 2, '$'), LinesInTerm('>>> 2 + 3', '5', '>>> '))
+        execute bufwinnr(bufnr) . 'wincmd w'
+        ReplRecv
+        Assert Equals(getline(1, '$'), ['', '1 + 1', '2 + 3'])
+        ReplStop
+        Assert Empty(TermList())
+        Assert True(WithTimeout(1, {-> empty(reply#lifecycle#running_repls())}))
+    End
+End
