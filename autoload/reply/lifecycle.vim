@@ -70,17 +70,36 @@ function! s:new_repl(name) abort
     return repl
 endfunction
 
+function! s:new_user_repl(define) abort
+    " User-defined repl object
+    let repl = a:define()
+    call reply#log('User-defined REPL', repl.name)
+    if !repl.is_available()
+        call reply#log(repl.name, 'is not available')
+        return v:null
+    endif
+    return repl
+endfunction
+
 function! s:new_repl_for_filetype(filetype) abort
     let names = get(reply#var('repls', {}), a:filetype, get(s:default_repls, a:filetype, []))
     if empty(names)
         throw reply#error("No REPL is selectable for filetype '%s'. Please read `:help g:reply_repls`", a:filetype)
     endif
 
-    for name in names
-        let repl = s:new_repl(name)
+    for l:Name in names
+        if type(l:Name) == v:t_string
+            " Builtin REPL
+            let repl = s:new_repl(Name)
+        else
+            " User-defined REPL
+            let repl = s:new_user_repl(l:Name)
+        endif
         if repl isnot v:null
             return repl
         endif
+        unlet repl
+        unlet l:Name
     endfor
 
     throw reply#error("No REPL is available for filetype '%s'. Candidates are %s", a:filetype, names)
