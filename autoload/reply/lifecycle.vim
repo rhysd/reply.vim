@@ -2,7 +2,7 @@
 " Note: gore does not work at all
 let s:default_repls = {
 \   'ruby': ['pry', 'irb'],
-\   'python': ['ptpython', 'python'],
+\   'python': ['ptpython', 'python3', 'python'],
 \   'ocaml': ['ocaml'],
 \   'javascript': ['node', 'd8', 'electron'],
 \   'typescript': ['ts_node'],
