@@ -14,6 +14,24 @@ REPLs play nicely with :terminal on Vim and Neovim
 - Supports both Vim (8+) and Neovim
 - Tested
 
+## Screen casts
+
+Open `node` with `:Repl` command from JavaScript buffer with sending some code from an edit buffer.
+`:ReplSend` can send additional text from an edit buffer.
+
+![example to send code](https://github.com/rhysd/ss/blob/master/reply.vim/send.gif?raw=true)
+
+Open `pry` (Ruby REPL) with `:Repl` command and Input some lines in REPL. Finally sends the inputs
+to an edit buffer with `:ReplRecv`.
+
+![example to receive code](https://github.com/rhysd/ss/blob/master/reply.vim/recv.gif?raw=true)
+
+Open `node` with `:ReplAuto` and some code edited in an edit buffer are sent to REPL and evaluated
+automatically.
+This feature is experimental and it may not work with some REPL command.
+
+![example to auto binding](https://github.com/rhysd/ss/blob/master/reply.vim/auto.gif?raw=true)
+
 ## Problem This Plugin Solves
 
 REPL is useful to learn/confirm APIs and language features promptly. I usually split a new Tmux pane
@@ -198,29 +216,6 @@ variables.
 
 ## License
 
-Distributed under the MIT license.
-
-```
-the MIT License
-
-Copyright (c) 2018 rhysd
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
-THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-```
+Distributed under [the MIT license](LICENSE).
 
 [repo]: https://github.com/rhysd/reply.vim
