@@ -213,6 +213,32 @@ to avoid consuming too wide space by REPL.
 `b:reply_termwin_max_height` and `b:reply_termwin_max_width` are buffer-local version of the
 variables.
 
+### `b:reply_ptpython_prompt_start`
+
+- Type: `string`
+- Default value: undefined
+
+The ptpython REPL can have differet prompt starts depeding on your ptpython config.py. 
+
+This can cause the `ReplRecv` command to fail, as it depends on the prompt start.
+
+To avoid this issue, ptpython users should set `b:reply_ptpython_prompt_start`. 
+
+If you only use the REPL while editing python files, then I'd reccomend setting it in `ftplugin/python.vim`.
+
+If you want to be able to use the ptpython REPL with any filetype, then I'd set it in your `.vimrc`
+
+If you use the 'classic' prompt start, then:
+
+```vim
+let b:reply_ptpython_prompt_start = "classic"
+```
+
+If you use the 'ipython' prompt start, then:
+
+```vim
+let b:reply_ptpython_prompt_start = "classic"
+```
 
 ## License
 
