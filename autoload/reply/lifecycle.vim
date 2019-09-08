@@ -70,6 +70,16 @@ function! s:new_repl(name) abort
     return repl
 endfunction
 
+function! s:new_conditional_repl(define) abort
+    let cond = a:define.if()
+    call reply#log('Got a conditional repl of', a:define.name . ' with ' . cond)
+    if cond
+        call reply#log('The conditional repl starts.')
+        return s:new_repl(a:define.name)
+    endif
+    return v:null
+endfunction
+
 function! s:new_user_repl(define) abort
     " User-defined repl object
     let repl = a:define()
@@ -91,6 +101,9 @@ function! s:new_repl_for_filetype(filetype) abort
         if type(l:Name) == v:t_string
             " Builtin REPL
             let repl = s:new_repl(Name)
+        elseif type(l:Name) == v:t_dict
+            " Condtional REPL #{name: foo, if: { -> bar }}
+            let repl = s:new_conditional_repl(l:Name)
         else
             " User-defined REPL
             let repl = s:new_user_repl(l:Name)
