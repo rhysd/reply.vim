@@ -46,7 +46,7 @@ If you use any package manager, please follow its instruction.
 With [vim-plug](https://github.com/junegunn/vim-plug):
 
 ```vim
-Plug 'rhysd/reply.vim'
+Plug 'rhysd/reply.vim', { 'on': ['Repl', 'ReplAuto'] }
 ```
 
 With [dein.vim](https://github.com/Shougo/dein.vim):
