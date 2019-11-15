@@ -46,11 +46,14 @@ If you use any package manager, please follow its instruction.
 
 With vim-plug:
 >
-  Plug 'rhysd/reply.vim'
+  Plug 'rhysd/reply.vim', { 'on': ['Repl', 'ReplAuto'] }
 <
 With dein.vim:
 >
-  call dein#add('rhysd/reply.vim')
+  call dein#add('rhysd/reply.vim', {
+              \   'lazy' : 1,
+              \   'on_cmd' : ['Repl', 'ReplAuto'],
+              \ })
 <
 With minpac:
 >
