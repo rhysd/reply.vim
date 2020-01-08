@@ -5,7 +5,7 @@ function! s:repl.executable() abort
 endfunction
 
 function! s:repl.is_available() abort
-  return executable(self.executable()) && !empty(glob("./build.sbt"))
+  return executable(self.executable()) && filereadable("./build.sbt")
 endfunction
 
 function! s:repl.get_command() abort
