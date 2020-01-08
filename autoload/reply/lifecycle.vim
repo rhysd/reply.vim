@@ -19,7 +19,7 @@ let s:default_repls = {
 \   'zsh': ['zsh'],
 \   'julia': ['julia'],
 \   'crystal': ['icr'],
-\   'scala': ['scala'],
+\   'scala': ['sbt_console', 'scala'],
 \   'kotlin': ['kotlinc'],
 \   'clojure': ['clojure'],
 \   'java': ['jshell'],
