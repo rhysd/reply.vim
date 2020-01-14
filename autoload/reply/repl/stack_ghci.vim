@@ -26,7 +26,7 @@ function! s:repl.default_cmdopts()
 endfunction
 
 function! s:repl.is_available() abort
-  return executable(self.executable()) && !empty(glob("./stack.yaml"))
+  return executable(self.executable()) && filereadable('./stack.yaml')
 endfunction
 
 function! reply#repl#stack_ghci#new() abort
