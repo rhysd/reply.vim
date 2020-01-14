@@ -24,6 +24,25 @@ function! s:repl.extract_input_from_terminal_buf(lines) abort
     return input
 endfunction
 
+function! s:repl.get_command() abort
+    return self.get_base_command() + self.get_var('command_options', [])
+endfunction
+
+functio! s:repl.get_base_command() abort
+  let result = [self.executable()]
+  if self.executable() == 'stack'
+    let result += ['exec', 'ghci']
+  endif
+  return result
+endfunctio
+
+function! s:repl.executable() abort
+  if executable('ghci')
+    return 'ghci'
+  endif
+  return 'stack'
+endfunction
+
 function! reply#repl#ghci#new() abort
     return deepcopy(s:repl)
 endfunction

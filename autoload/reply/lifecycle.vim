@@ -6,7 +6,7 @@ let s:default_repls = {
 \   'ocaml': ['ocaml'],
 \   'javascript': ['node', 'd8', 'electron'],
 \   'typescript': ['ts_node'],
-\   'haskell': ['ghci'],
+\   'haskell': ['stack_ghci', 'ghci'],
 \   'swift': ['swift'],
 \   'lua': ['lua'],
 \   'scheme': ['gauche', 'chibi_scheme', 'mit_scheme'],
