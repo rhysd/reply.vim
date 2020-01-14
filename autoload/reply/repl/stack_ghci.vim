@@ -1,7 +1,7 @@
 let s:repl = reply#repl#base('stack ghci')
 
 function! s:repl.executable() abort
-  return "stack"
+  return 'stack'
 endfunction
 
 function! s:repl.get_command() abort
